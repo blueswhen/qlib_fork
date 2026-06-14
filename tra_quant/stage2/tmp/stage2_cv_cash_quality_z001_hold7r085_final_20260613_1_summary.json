@@ -1,0 +1,102 @@
+{
+  "run_mode": "stage2_cv_selected_final_test_once",
+  "selection_scope": "validation_cv_only",
+  "test_usage_policy": "single_final_evaluation_after_cv_candidate_fixed",
+  "target_test_ann": 0.2643467300531994,
+  "legacy_target_test_ann": 0.22004029352797247,
+  "current_best_test_ann": 0.2643467300531994,
+  "test_improves_target_ann": false,
+  "selection_rule": {
+    "full_ann_min": 0.24,
+    "year_ann_min_min": 0.22,
+    "year_ann_std_max": 0.04,
+    "sort": [
+      "stable_score",
+      "year_ann_min",
+      "year_ann_mean",
+      "full_ann"
+    ]
+  },
+  "cv_grid_path": "/home/blueswhen/DL/qlib_fork/tra_quant/stage2/tmp/stage2_cv_robust_small_stable_core_20260613_1_cv_grid.csv",
+  "selected_cv_row": {
+    "trial_name": "cash_quality_z_tw001__prac_m000_hold7_r085",
+    "signal_name": "cash_quality_z_tw001",
+    "kind": "cash_quality_linear",
+    "strategy_trial": "prac_m000_hold7_r085",
+    "n_drop": 1,
+    "risk_degree": 0.85,
+    "kwargs_extra": "{'score_margin': 0.0, 'hold_thresh': 7, 'slot_budget_ratio': 1.0}",
+    "tab_weight": 0.01,
+    "low_q": null,
+    "penalty": null,
+    "high_q": null,
+    "bonus": null,
+    "status": "success",
+    "score_mode": "valid_yearly_cv_stage2_v1",
+    "stable_score": 323.1709421685742,
+    "segment_mean_score": 332.9834353933323,
+    "stability_penalty": 9.812493224758102,
+    "year_ann_mean": 0.2629536635483977,
+    "year_ann_min": 0.2498259036668698,
+    "year_ann_std": 0.009296576207662,
+    "year_ann_spread": 0.0203128758056443,
+    "year_ir_mean": 1.4400927083682893,
+    "year_mdd_mean": -0.0987431786739962,
+    "full_score": 364.6001299070849,
+    "full_ann": 0.2897001638735071,
+    "full_ir": 1.5433981279223323,
+    "full_mdd": -0.1134970181269422,
+    "ann_2020": 0.2498259036668698,
+    "ir_2020": 1.350858339558485,
+    "mdd_2020": -0.1030805108191869,
+    "ann_2021": 0.2701387794725141,
+    "ir_2021": 1.3701701091701504,
+    "mdd_2021": -0.0940403008950549,
+    "ann_2022": 0.2688963075058091,
+    "ir_2022": 1.5992496763762325,
+    "mdd_2022": -0.0991087243077467
+  },
+  "window_key": "w1",
+  "train": [
+    "2012-01-01",
+    "2019-12-31"
+  ],
+  "valid": [
+    "2020-01-01",
+    "2022-12-31"
+  ],
+  "test": [
+    "2023-01-01",
+    "2026-04-01"
+  ],
+  "base_model_trial": "rank_ensemble_3seed_tra72_old6",
+  "stage1_test_common_rows": 232836,
+  "stage1_test_seed_cache_paths": [
+    "/home/blueswhen/DL/qlib_fork/tra_quant/stage2/tra_cache/rolling_cache_tra_w1_tra_lstm_base_Alpha360_step240_k5_d1_a150000_r085_strict_tra_lstm_s240_h5_final_test_tra18_residual_step1_20260506_1.pkl",
+    "/home/blueswhen/DL/qlib_fork/tra_quant/stage2/tra_cache/rolling_cache_tra_w1_tra_lstm_base_Alpha360_step240_k5_d1_a150000_r07_dualseed_s2026_test_dualseed_formal_seedxroll_b12000_20260514_1.pkl",
+    "/home/blueswhen/DL/qlib_fork/tra_quant/stage2/tra_cache/rolling_cache_tra_w1_tra_lstm_base_Alpha360_step240_k5_d1_a150000_r07_dualseed_s3407_test_dualseed_formal_seedxroll_b12000_20260514_1.pkl"
+  ],
+  "signal_name": "cash_quality_z_tw001",
+  "signal_kind": "cash_quality_linear",
+  "signal_profile": "robust-small",
+  "fundamental_feature_path": "/home/blueswhen/DL/qlib_fork/training_data/processed/training/csi300_daily_fundamental_features_rankpct_qlib.parquet",
+  "announcement_feature_path": null,
+  "strategy_trial": "prac_m000_hold7_r085",
+  "strategy_class": "PracticalTopkDropoutStrategy",
+  "strategy_module_path": "qlib.contrib.strategy.custom_signal_strategy",
+  "n_drop": 1,
+  "risk_degree": 0.85,
+  "kwargs_extra": {
+    "score_margin": 0.0,
+    "hold_thresh": 7,
+    "slot_budget_ratio": 1.0
+  },
+  "test_cache_path": "/home/blueswhen/DL/qlib_fork/tra_quant/stage2/fusion_cache/cash_quality_z_tw001__prac_m000_hold7_r085_stage2_cv_cash_quality_z001_hold7r085_final_20260613_1_test.pkl",
+  "test_recorder_id": "local:cash_quality_z_tw001__prac_m000_hold7_r085_stage2_cv_cash_quality_z001_hold7r085_final_20260613_1_test",
+  "test_IC": 0.04231385517278539,
+  "test_Rank_IC": 0.06442601943935405,
+  "test_with_cost_ann_return": 0.2643467300531994,
+  "test_with_cost_ir": 1.8243593079319267,
+  "test_with_cost_mdd": -0.09423283807818261,
+  "test_score": 353.6800386882321
+}

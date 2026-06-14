@@ -1,0 +1,55 @@
+{
+  "baseline_name": "stage2_cash_quality_z_tw001_on_rank_ensemble_3seed_tra72_old6",
+  "updated_at": "2026-06-13",
+  "workspace": "tra_quant/stage2",
+  "data_split": {
+    "window_key": "w1",
+    "train": ["2012-01-01", "2019-12-31"],
+    "valid": ["2020-01-01", "2022-12-31"],
+    "test": ["2023-01-01", "2026-04-01"]
+  },
+  "fixed_conditions": {
+    "benchmark": "SH000300",
+    "instruments": "csi300",
+    "account": 150000,
+    "topk": 5
+  },
+  "stage1": {
+    "name": "rank_ensemble_3seed_tra72_old6",
+    "strategy_trial": "prac_m000_hold3_r085",
+    "validation_summary": "tmp/rank_ensemble_old6_validation_summary_20260517.txt",
+    "final_test_summary": "tmp/rank_ensemble_old6_final_test_summary_20260517.txt",
+    "repro_json": "tmp/repro_rank_ensemble_single_strategy_v2.json",
+    "test_ann": 0.16268627636270552
+  },
+  "stage2": {
+    "selection_scope": "validation_cv_only",
+    "signal": "cash_quality_z_tw001",
+    "signal_kind": "cash_quality_linear",
+    "strategy_trial": "prac_m000_hold7_r085",
+    "n_drop": 1,
+    "risk_degree": 0.85,
+    "kwargs_extra": {
+      "score_margin": 0.0,
+      "hold_thresh": 7,
+      "slot_budget_ratio": 1.0
+    },
+    "fundamental_feature_path": "../../training_data/processed/training/csi300_daily_fundamental_features_rankpct_qlib.parquet",
+    "cv_grid": "tmp/stage2_cv_robust_small_stable_core_20260613_1_cv_grid.csv",
+    "cv_summary": "tmp/stage2_cv_robust_small_stable_core_20260613_1_summary.json",
+    "final_test_summary": "tmp/stage2_cv_cash_quality_z001_hold7r085_final_20260613_1_summary.json",
+    "final_test_txt": "tmp/stage2_cv_cash_quality_z001_hold7r085_final_20260613_1.txt",
+    "final_test_cache": "fusion_cache/cash_quality_z_tw001__prac_m000_hold7_r085_stage2_cv_cash_quality_z001_hold7r085_final_20260613_1_test.pkl",
+    "final_test": {
+      "test_ann": 0.2643467300531994,
+      "test_ir": 1.8243593079319251,
+      "test_mdd": -0.09423283807818256,
+      "test_IC": 0.04231385517278539,
+      "test_Rank_IC": 0.06442601943935405
+    }
+  },
+  "reproduce": {
+    "final_test_command": "PYTHONPATH=/home/blueswhen/DL/qlib_fork:$PYTHONPATH python evaluate_stage2_cv_selected_final.py",
+    "cv_search_command": "PYTHONPATH=/home/blueswhen/DL/qlib_fork:$PYTHONPATH python run_stage2_signal_cv_search.py --output-prefix tmp/stage2_cv_robust_small_stable_core_20260613_1 --result-suffix stage2_cv_robust_small_stable_core_20260613_1 --signal-profile robust-small --strategy-profile stable-core --num-shards 8 --launch-shards --force-recompute"
+  }
+}
