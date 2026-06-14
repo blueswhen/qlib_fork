@@ -1,0 +1,5 @@
+window_key=w1
+train=['2012-01-01', '2019-12-31']
+valid=['2020-01-01', '2022-12-31']
+test=['2023-01-01', '2026-04-01']
+seed_runs_test=[{'seed': 42, 'cache_path': '/home/blueswhen/DL/qlib/examples/my_strategy/tra_cache/rolling_cache_tra_w1_tra_lstm_base_Alpha360_step240_k5_d1_a150000_r085_strict_tra_lstm_s240_h5_final_test_tra18_residual_step1_20260506_1.pkl', 'result_path': None, 'recorder_id': 'None'}, {'seed': 2026, 'cache_path': '/home/blueswhen/DL/qlib/examples/my_strategy/tra_cache/rolling_cache_tra_w1_tra_lstm_base_Alpha360_step240_k5_d1_a150000_r07_dualseed_s2026_test_dualseed_formal_seedxroll_b12000_20260514_1.pkl', 'result_path': None, 'recorder_id': 'None'}, {'seed': 3407, 'cache_path': '/home/blueswhen/DL/qlib/examples/my_strategy/tra_cache/rolling_cache_tra_w1_tra_lstm_base_Alpha360_step240_k5_d1_a150000_r07_dualseed_s3407_test_dualseed_formal_seedxroll_b12000_20260514_1.pkl', 'result_path': None, 'recorder_id': 'None'}]

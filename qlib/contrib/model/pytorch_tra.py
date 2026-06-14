@@ -30,6 +30,37 @@ from qlib.contrib.data.dataset import MTSDatasetH
 device = "cuda" if torch.cuda.is_available() else "cpu"
 
 
+def _deterministic_runtime_enabled():
+    return os.environ.get("QLIB_TRA_DETERMINISTIC", "1").lower() not in {"0", "false", "no"}
+
+
+def _configure_torch_determinism(seed):
+    if seed is None:
+        return
+    if not _deterministic_runtime_enabled():
+        return
+
+    os.environ.setdefault("PYTHONHASHSEED", str(seed))
+    os.environ.setdefault("CUBLAS_WORKSPACE_CONFIG", ":4096:8")
+
+    np.random.seed(seed)
+    torch.manual_seed(seed)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(seed)
+        torch.cuda.manual_seed_all(seed)
+
+    if hasattr(torch, "use_deterministic_algorithms"):
+        torch.use_deterministic_algorithms(True)
+
+    if hasattr(torch.backends, "cudnn"):
+        torch.backends.cudnn.deterministic = True
+        torch.backends.cudnn.benchmark = False
+        torch.backends.cudnn.allow_tf32 = False
+
+    if hasattr(torch.backends, "cuda") and hasattr(torch.backends.cuda, "matmul"):
+        torch.backends.cuda.matmul.allow_tf32 = False
+
+
 class TRAModel(Model):
     """
     TRA Model
@@ -50,6 +81,7 @@ class TRAModel(Model):
         logdir (str): local log directory
         eval_train (bool): whether evaluate train set between epochs
         eval_test (bool): whether evaluate test set between epochs
+        eval_freq (int): evaluate every N epochs instead of every epoch
         pretrain (bool): whether pretrain the backbone model before training TRA.
             Note that only TRA will be optimized after pretraining
         init_state (str): model init state path
@@ -76,6 +108,7 @@ class TRAModel(Model):
         logdir=None,
         eval_train=False,
         eval_test=False,
+        eval_freq=1,
         pretrain=False,
         init_state=None,
         reset_router=False,
@@ -96,9 +129,7 @@ class TRAModel(Model):
         if transport_method == "router" and not eval_train:
             self.logger.warning("`eval_train` will be ignored when using TRA.router")
 
-        if seed is not None:
-            np.random.seed(seed)
-            torch.manual_seed(seed)
+        _configure_torch_determinism(seed)
 
         self.model_config = model_config
         self.tra_config = tra_config
@@ -115,6 +146,7 @@ class TRAModel(Model):
         self.logdir = logdir
         self.eval_train = eval_train
         self.eval_test = eval_test
+        self.eval_freq = max(1, int(eval_freq))
         self.pretrain = pretrain
         self.init_state = init_state
         self.reset_router = reset_router
@@ -374,6 +406,10 @@ class TRAModel(Model):
             self.logger.info("training...")
             self.train_epoch(epoch, train_set, is_pretrain=is_pretrain)
 
+            should_eval = ((epoch + 1) % self.eval_freq == 0) or (epoch == self.n_epochs - 1)
+            if not should_eval:
+                continue
+
             self.logger.info("evaluating...")
             # NOTE: during evaluating, the whole memory will be refreshed
             if not is_pretrain and (self.transport_method == "router" or self.eval_train):
@@ -485,6 +521,7 @@ class TRAModel(Model):
                     "alpha": self.alpha,
                     "seed": self.seed,
                     "logdir": self.logdir,
+                    "eval_freq": self.eval_freq,
                     "pretrain": self.pretrain,
                     "init_state": self.init_state,
                     "transport_method": self.transport_method,

@@ -1,4 +1,4 @@
-# tra_quant 注意事项
+# tra_quant/stage1 注意事项
 
 这份说明面向另一台服务器上的远端复现，重点补充实际运行时容易踩坑的地方。
 
@@ -6,7 +6,7 @@
 
 - 如果只是看纯 stage1，也就是 TRA + Alpha360 从零训练，这个目录里的主脚本和训练数据已经基本齐了。
 - 如果要复现带 cache、fusion、rank ensemble 的旧结果，不能只依赖普通 git pull，还要确认被 `.gitignore` 忽略的大文件是否真的提交到了远端，或者用其他方式同步过去。
-- 当前这套目录默认假设你在 `qlib_fork/tra_quant` 下运行。
+- 当前这套目录默认假设你在 `qlib_fork/tra_quant/stage1` 下运行。
 
 ## 目录用途
 
@@ -18,7 +18,7 @@
 - `fusion_cache/`：融合 cache。
 - `mlruns/`：训练和评估 artifact。
 - `xgb_cache/`：当前 multiseed 主线直接引用的 tabular cache。
-- `../training_data/cn_data_latest`：Qlib Alpha360 数据目录。
+- `../../training_data/cn_data_latest`：Qlib Alpha360 数据目录。
 
 ## 远端运行前提
 
@@ -36,11 +36,11 @@
 
 默认数据目录是：
 
-- `../training_data/cn_data_latest`
+- `../../training_data/cn_data_latest`
 
 包装脚本会自动设置：
 
-- `QLIB_PROVIDER_URI=$SCRIPT_DIR/../training_data/cn_data_latest`
+- `QLIB_PROVIDER_URI=$SCRIPT_DIR/../../training_data/cn_data_latest`
 
 如果你要改数据位置，可以在运行前手动导出自己的 `QLIB_PROVIDER_URI`。
 
@@ -149,7 +149,7 @@ pip install -e .
 如果你要尽量避免旧结果干扰：
 
 ```bash
-cd /path/to/qlib_fork/tra_quant
+cd /path/to/qlib_fork/tra_quant/stage1
 rm -f tra_strict_validation_results.csv tra_strict_validation_best.txt tra_strict_final_test.txt
 ./train_stage1_tra.sh --force-final
 ```
@@ -157,14 +157,14 @@ rm -f tra_strict_validation_results.csv tra_strict_validation_best.txt tra_stric
 ### 3. 当前 multiseed 主线
 
 ```bash
-cd /path/to/qlib_fork/tra_quant
+cd /path/to/qlib_fork/tra_quant/stage1
 ./run_current_multiseed.sh
 ```
 
 ### 4. rank ensemble 搜索
 
 ```bash
-cd /path/to/qlib_fork/tra_quant
+cd /path/to/qlib_fork/tra_quant/stage1
 ./run_rank_ensemble_search.sh
 ```
 

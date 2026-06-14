@@ -13,6 +13,7 @@ In ``DelayTrainer``, the first step is only to save some necessary info to model
 
 import socket
 from typing import Callable, List, Optional
+from pathlib import Path
 
 from tqdm.auto import tqdm
 
@@ -33,10 +34,25 @@ from qlib.workflow.recorder import Recorder
 from qlib.workflow.task.manage import TaskManager, run_task
 
 
+logger = get_module_logger("trainer")
+
+
 def _log_task_info(task_config: dict):
     R.log_params(**flatten_dict(task_config))
     R.save_objects(**{"task": task_config})  # keep the original format and datatype
     R.set_tags(**{"hostname": socket.gethostname()})
+
+
+def _get_task_fit_save_path(rec: Recorder) -> Optional[str]:
+    try:
+        recorder_dir = Path(rec.get_local_dir())
+    except Exception as exc:
+        logger.warning("skip save_path injection because recorder local dir is unavailable: %s", exc)
+        return None
+
+    fit_dir = recorder_dir / "artifacts" / "fit"
+    fit_dir.mkdir(parents=True, exist_ok=True)
+    return str((fit_dir / "model.bin").resolve())
 
 
 def _exe_task(task_config: dict):
@@ -46,7 +62,11 @@ def _exe_task(task_config: dict):
     dataset: Dataset = init_instance_by_config(task_config["dataset"], accept_types=Dataset)
     reweighter: Reweighter = task_config.get("reweighter", None)
     # model training
-    auto_filter_kwargs(model.fit)(dataset, reweighter=reweighter)
+    fit_kwargs = {"reweighter": reweighter}
+    fit_save_path = _get_task_fit_save_path(rec)
+    if fit_save_path is not None:
+        fit_kwargs["save_path"] = fit_save_path
+    auto_filter_kwargs(model.fit)(dataset, **fit_kwargs)
     R.save_objects(**{"params.pkl": model})
     # this dataset is saved for online inference. So the concrete data should not be dumped
     dataset.config(dump_all=False, recursive=True)

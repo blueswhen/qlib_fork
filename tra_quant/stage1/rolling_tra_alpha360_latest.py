@@ -29,7 +29,7 @@ from qlib.workflow.task.gen import RollingGen, task_generator
 
 
 BASE_DIR = Path(__file__).resolve().parent
-PROVIDER_URI = os.environ.get("QLIB_PROVIDER_URI", str((BASE_DIR.parent / "training_data" / "cn_data_latest").resolve()))
+PROVIDER_URI = os.environ.get("QLIB_PROVIDER_URI", str((BASE_DIR.parent.parent / "training_data" / "cn_data_latest").resolve()))
 CACHE_DIR = BASE_DIR / "tra_cache"
 HANDLER_CACHE_DIR = CACHE_DIR / "handlers"
 DETERMINISTIC_SEED = 42

@@ -9,6 +9,54 @@
 
 如果后续再做 TRA 复现、rank ensemble、multiseed ensemble、或者做 cache forensic，先看这份文档，再决定跑哪个脚本。
 
+## 0. 当前冻结的权威 TRA Baseline
+
+当前仓库里，纯 TRA 这条线真正应该冻结为 best baseline 的，不是单 seed 的 `tra_best_72_rerun_20260516_1`，而是 old provenance 下的 3-seed rank ensemble 72 空间 score winner。
+
+权威 baseline 定义：
+
+- 搜索空间：72 策略子空间
+- 选择规则：`validation_score -> validation_with_cost_ann_return -> validation_with_cost_ir`，全部按降序
+- provenance：old validation 3 cache + old test 3 cache，不能和 current multiseed basis 混用
+- winner：`prac_m000_hold3_r085`
+
+冻结结果：
+
+- validation_score = 266.0988237852937
+- validation_ann = 0.2194366933519968
+- validation_ir = 1.1263637944285017
+- validation_mdd = -0.2085999506707754
+- test_ann = 0.16268627636270552
+- test_ir = 1.0552511615852953
+- test_mdd = -0.23068313292472836
+- valid_common_rows = 287568
+- test_common_rows = 232836
+
+权威落盘产物：
+
+- [tmp/repro_rank_ensemble_single_strategy_v2.json](tmp/repro_rank_ensemble_single_strategy_v2.json)
+- [tmp/rank_ensemble_300_180_72_comparison_20260517.json](tmp/rank_ensemble_300_180_72_comparison_20260517.json)
+- [tmp/rank_ensemble_old6_validation_summary_20260517.txt](tmp/rank_ensemble_old6_validation_summary_20260517.txt)
+- [tmp/rank_ensemble_old6_final_test_summary_20260517.txt](tmp/rank_ensemble_old6_final_test_summary_20260517.txt)
+
+为什么它是权威 baseline：
+
+- 2026-05-17 已经明确比较过 72 / 180 / 300 三个搜索空间在同一套 old 6-cache basis 下的结果。
+- 在 test ann 上，72 空间 score winner 的 0.16268627636270552 明显高于 180 / 300 空间 score winner 的 0.0068256194964634274。
+- 因此对“纯 TRA + 3-seed rank ensemble”这条线，真正该被冻结的 best baseline 就是 72 空间 score winner，而不是 180 / 300，也不是单 seed 72 rerun。
+
+需要单独降级说明的相邻产物：
+
+- [tra_global_validation_best_tra_best_72_rerun_20260516_1.txt](tra_global_validation_best_tra_best_72_rerun_20260516_1.txt)
+- [tra_global_final_test_tra_best_72_rerun_20260516_1.txt](tra_global_final_test_tra_best_72_rerun_20260516_1.txt)
+
+这两份文件只代表“单 seed 72 空间 rerun”的 stage-1 结果：
+
+- strategy_trial = `prac_m000_hold5_r085`
+- test_ann = 0.1341598484109505
+
+它们不是本文冻结的权威 best baseline，不能替代上面这条 old-provenance 3-seed rank ensemble 结果。
+
 ## 1. 固定数据切分与共用常量
 
 当前 TRA 主线默认使用：
@@ -133,6 +181,14 @@ TRA_best_baseline 的真实 72 搜索空间是：
 
 - rank_ensemble_3seed_300_validation_grid.csv
 - rank_ensemble_3seed_300_summary.json
+
+性能优化：
+
+- 已按 [run_alstm_300_strategy_search_fast.py](run_alstm_300_strategy_search_fast.py) 的 fast path 落实同类优化。
+- validation 搜索直接从 cache 读取 signal，跳过 recorder/workflow 评估开销，直接调用 `normal_backtest`。
+- yearly stability 子区间也使用直接回测，保持 `validation_score` 口径不变。
+- 支持 `--strategy-profile 300|tra-best-72`、`--strategy-trial`、`--num-shards`、`--shard-index`、`--merge-shards` 和断点复用。
+- 默认 `--output-prefix` 仍对应 `rank_ensemble_3seed_300_*`，不改变旧产物命名。
 
 注意：
 
@@ -332,6 +388,12 @@ TRA_best_baseline 的实际筛选方法是：
 
 这也是为什么文档里凡是引用 TRA_best_baseline 时，都应该默认它来自“72 策略 validation-first + test-once”这条工作流。
 
+但这里还要再补一句，避免后续继续混淆：
+
+- 如果只看单 seed rerun，`tra_best_72_rerun_20260516_1` 确实也是 72 空间 validation-first + test-once。
+- 但本文冻结的权威 best baseline 不是那条单 seed 结果，而是 3-seed old provenance rank ensemble 的 72 空间 score winner。
+- 以后凡是说“TRA best baseline”，默认都指本文第 0 节和第 7 节这条 3-seed baseline，除非显式写明“单 seed 72 rerun”。
+
 ### 6.2 dual-seed formal
 
 流程：
@@ -405,41 +467,67 @@ test 阶段的规则只有一条：
 
 - 不做 test 全搜索，只给 validation winner 跑 1 次 test
 
-### 6.5 用当前模型缓存重跑 300 策略 TODO
+### 6.4.1 当前权威 baseline 的完整工作链
 
-这部分是接下来要执行的操作清单，目标是基于“当前模型缓存”重跑一次完整的 300 策略搜索，并且保持选择逻辑和结果口径固定。
+如果目标是精确复现本文冻结的 `prac_m000_hold3_r085` 结果，工作链必须按下面这个顺序理解：
 
-注意：
+1. 先有 seed42 的 old base cache。
+2. 再补 seed2026 和 seed3407 的 dual-seed formal valid/test cache。
+3. 用这 6 个 cache 固定 old provenance。
+4. 在 72 空间里按 `validation_score -> ann -> ir` 选 winner。
+5. 只对这个 winner 跑 1 次 test。
 
-- 这一节对应的是后续要复跑的 300 空间
-- 它不是 TRA_best_baseline 当年真正使用的搜索空间
-- TRA_best_baseline 的真实历史搜索空间仍然是上面单独写明的 72 空间
+对应到当前仓库里的冻结产物：
 
-TODO：
+1. seed42 old base 分支
+   - validation summary: [tra_global_validation_best_tra18_residual_step1_20260506_1.txt](tra_global_validation_best_tra18_residual_step1_20260506_1.txt)
+   - final test summary: [tra_global_final_test_tra18_residual_step1_20260506_1.txt](tra_global_final_test_tra18_residual_step1_20260506_1.txt)
+   - log: [tra18_residual_step1_20260506_1.log](tra18_residual_step1_20260506_1.log)
+2. seed2026 / seed3407 dual-seed formal 分支
+   - launcher: [run_dualseed_b12000_then_seed42_refcheck.py](run_dualseed_b12000_then_seed42_refcheck.py)
+   - frozen suffix: `dualseed_formal_seedxroll_b12000_20260514_1`
+   - log: [dualseed_formal_seedxroll_b12000_20260514_1.log](dualseed_formal_seedxroll_b12000_20260514_1.log)
+3. old 6-cache provenance 封装
+   - validation summary wrapper: [tmp/rank_ensemble_old6_validation_summary_20260517.txt](tmp/rank_ensemble_old6_validation_summary_20260517.txt)
+   - final test summary wrapper: [tmp/rank_ensemble_old6_final_test_summary_20260517.txt](tmp/rank_ensemble_old6_final_test_summary_20260517.txt)
+4. winner 和最终指标冻结
+   - single-strategy reproduction: [tmp/repro_rank_ensemble_single_strategy_v2.json](tmp/repro_rank_ensemble_single_strategy_v2.json)
+   - 72/180/300 对照: [tmp/rank_ensemble_300_180_72_comparison_20260517.json](tmp/rank_ensemble_300_180_72_comparison_20260517.json)
 
-1. 先确认 validation 侧使用的是 [current_best_multiseed_ensemble_validation.txt](current_best_multiseed_ensemble_validation.txt) 里的 seed_runs_valid 三条 cache_path，而不是 old rank-ensemble validation provenance。
-2. 明确这次要跑满完整 300 个策略，不能抽样，不能只跑局部子集。完整集合必须严格等于以下笛卡尔积：3 个 hold_thresh x 5 个 n_drop x 5 个 risk_degree x 4 个 score_margin。
-3. 具体策略集合按以下条件展开：hold_thresh ∈ {3, 4, 5}，n_drop ∈ {1, 2, 3, 4, 5}，risk_degree ∈ {0.60, 0.70, 0.85, 0.95, 1.00}，score_margin ∈ {0.0000, 0.0025, 0.0050, 0.0100}。
-4. strategy_trial 命名必须保持和脚本一致，即 `prac_{margin_tag}{drop_tag}_hold{hold}_{risk_tag}`；这样跑完后才能直接和 [rank_ensemble_3seed_300_validation_grid.csv](rank_ensemble_3seed_300_validation_grid.csv) 逐行对照。
-5. 运行方法固定为 validation-first：先对 300 个策略全部跑 validation，写出或复用 [rank_ensemble_3seed_300_validation_grid.csv](rank_ensemble_3seed_300_validation_grid.csv)。
-6. validation winner 的筛选顺序固定为 validation_score -> validation_with_cost_ann_return -> validation_with_cost_ir，全部按降序。
-7. 只在 validation winner 确定之后，再跑 1 次 test；禁止对多个候选重复跑 test，避免把 test 当成调参集。
-8. 最终结果至少要同时记录 4 类信息：validation basis 的 3 条 cache_path、test basis 的 3 条 cache_path、validation winner 的 strategy_trial、以及这 1 次 test 的结果。
-9. 如果中途发现已有 validation grid 不是这套当前缓存跑出来的，就不能直接复用，必须先清楚区分 provenance，再决定是否用 --force-recompute 重跑全部 300 个策略。
+这里要严格区分两层“可复现”：
 
-补充前置条件：
+- 精确结果复现：当前仓库已经具备，直接复用这 6 个 cache 即可稳定复现 `test_ann = 0.16268627636270552`。
+- 历史训练过程重走：seed42 old branch 和 dual-seed formal 的上游训练链也都保留了脚本、summary、cache 和 log，但这是一条历史工作链，不是单条一键控制脚本。
 
-- [run_rank_ensemble_tra_alpha360_once.py](run_rank_ensemble_tra_alpha360_once.py) 在 `--validation-only` 模式下只要求 validation summary；只有继续执行 test-once 时，才要求 validation/test 两侧 summary 都存在
-- 当前 workspace 里已经存在 [current_best_multiseed_ensemble_validation.txt](current_best_multiseed_ensemble_validation.txt)
-- 但 [current_best_multiseed_ensemble_final_test.txt](current_best_multiseed_ensemble_final_test.txt) 可能不存在；如果它不存在，当前 300 空间脚本仍然可以先完成 validation-only 搜索，但无法直接完成 test-once 这一步
-- 如果下游只需要 test 侧的 3 条 provenance，可以先用 [run_current_best_multiseed_ensemble.py](run_current_best_multiseed_ensemble.py) 的 `--seed-runs-test-only` 生成只含 seed_runs_test 的 summary；如果需要完整 final test summary，则可以改用 `--materialize-test-summary`
-- 不要把“缺少 current_best_multiseed_ensemble_final_test.txt”误判成代码 bug；先检查是不是因为 multiseed validation 没通过 current best gate
+因此，本文把“真正的 best baseline”定义为可被当前仓库精确复现、并且已经完成 72/180/300 对照验证的那条结果。
 
-## 7. 已确认的单策略复现结果
+### 6.5 current-basis 300 空间支线结论
 
-2026-05-16 已经用“旧 validation 三条路径 + 旧 test 三条路径”成功复现：
+这部分不再作为待办，而是直接冻结为“无需再跑”。
+
+原因：
+
+- 这一节对应的是基于当前 multiseed 缓存的 300 空间重跑，它不是 TRA_best_baseline 当年真正使用的搜索空间。
+- TRA_best_baseline 的真实历史搜索空间仍然是上面单独写明的 72 空间，并且已经完成 old 6-cache basis 下的 72 / 180 / 300 对照。
+- [current_best_multiseed_ensemble_validation.txt](current_best_multiseed_ensemble_validation.txt) 已显示 `validation_improves_current_best=False`。
+- 当前 multiseed fused validation score 只有 `55.248472988667125`，明显低于当前主线 current best 的 `326.73602292831794`，也不构成任何值得继续 test-once 或重跑 300 空间搜索的候选。
+- 因此，按本文冻结口径，current-basis 这条支线已经可以直接判定为“不可能超过本文第 0 节和第 7 节已经冻结的 true best baseline”。
+
+执行结论：
+
+- 不再补跑 [current_best_multiseed_ensemble_final_test.txt](current_best_multiseed_ensemble_final_test.txt)。
+- 不再基于 current multiseed validation provenance 重跑 300 策略 validation-only。
+- 不再为 current-basis 300 空间补做 test-once。
+- 相关命令保留在后文仅作为历史操作说明，不再作为推荐执行步骤。
+- 如果后续有人再次看到这一节，应直接理解为“这条支线已经关闭”，而不是“还有一个待完成 TODO”。
+
+## 7. 已确认的权威 baseline 复现结果
+
+2026-05-16 到 2026-05-17 已经用“旧 validation 三条路径 + 旧 test 三条路径”成功冻结并复现：
 
 - strategy_trial: prac_m000_hold3_r085
+
+这就是当前应当记录为“纯 TRA true best baseline”的那条结果。
 
 正式复现入口：
 
@@ -481,15 +569,21 @@ TODO：
 
 如果这两个 common_rows 对不上，优先怀疑不是同一套 3 cache 交集，而不是先怀疑 strategy_trial。
 
+2026-05-17 额外完成的基线对照结论：
+
+- [tmp/rank_ensemble_300_180_72_comparison_20260517.json](tmp/rank_ensemble_300_180_72_comparison_20260517.json) 已确认，在同一套 old 6-cache basis 下，72 空间 score winner 的 test ann 高于 180 / 300 空间 score winner。
+- 因此本文第 0 节这条 `prac_m000_hold3_r085`，就是当前仓库内应该冻结的 true best baseline。
+
 ## 8. 精确复现命令
 
 下面这些命令都默认在仓库根目录执行，也就是 /home/blueswhen/DL/qlib。
 
-### 8.1 复现 old rank-ensemble 的单策略结果
+### 8.1 最短路径复现 true best baseline
 
 用途：
 
-- 精确复现 prac_m000_hold3_r085 的 old validation + old test 指标
+- 精确复现本文冻结的 true best baseline
+- 复用已经封装好的 old validation / old test summary wrapper
 - 同时把实际使用的 6 条 cache_path 写入输出 json
 
 命令：
@@ -497,12 +591,9 @@ TODO：
 ```bash
 python examples/my_strategy/repro_rank_ensemble_single_strategy.py \
   --strategy-trial prac_m000_hold3_r085 \
-  --validation-cache-path /home/blueswhen/DL/qlib/examples/my_strategy/tra_cache/rolling_cache_tra_w1_tra_lstm_base_Alpha360_step240_k5_d1_a150000_r07_strict_tra_lstm_s240_h5_tra18_residual_step1_20260506_1.pkl \
-  --validation-cache-path /home/blueswhen/DL/qlib/examples/my_strategy/tra_cache/rolling_cache_tra_w1_tra_lstm_base_Alpha360_step240_k5_d1_a150000_r07_dualseed_s2026_valid_dualseed_formal_seedxroll_b12000_20260514_1.pkl \
-  --validation-cache-path /home/blueswhen/DL/qlib/examples/my_strategy/tra_cache/rolling_cache_tra_w1_tra_lstm_base_Alpha360_step240_k5_d1_a150000_r07_dualseed_s3407_valid_dualseed_formal_seedxroll_b12000_20260514_1.pkl \
-  --test-cache-path /home/blueswhen/DL/qlib/examples/my_strategy/tra_cache/rolling_cache_tra_w1_tra_lstm_base_Alpha360_step240_k5_d1_a150000_r085_strict_tra_lstm_s240_h5_final_test_tra18_residual_step1_20260506_1.pkl \
-  --test-cache-path /home/blueswhen/DL/qlib/examples/my_strategy/tra_cache/rolling_cache_tra_w1_tra_lstm_base_Alpha360_step240_k5_d1_a150000_r07_dualseed_s2026_test_dualseed_formal_seedxroll_b12000_20260514_1.pkl \
-  --test-cache-path /home/blueswhen/DL/qlib/examples/my_strategy/tra_cache/rolling_cache_tra_w1_tra_lstm_base_Alpha360_step240_k5_d1_a150000_r07_dualseed_s3407_test_dualseed_formal_seedxroll_b12000_20260514_1.pkl
+   --validation-summary-path /home/blueswhen/DL/qlib/examples/my_strategy/tmp/rank_ensemble_old6_validation_summary_20260517.txt \
+   --final-test-summary-path /home/blueswhen/DL/qlib/examples/my_strategy/tmp/rank_ensemble_old6_final_test_summary_20260517.txt \
+   --output-path /home/blueswhen/DL/qlib/examples/my_strategy/tmp/repro_rank_ensemble_single_strategy.json
 ```
 
 预期结果：
@@ -510,6 +601,20 @@ python examples/my_strategy/repro_rank_ensemble_single_strategy.py \
 - validation.score 约等于 266.0988
 - test.ann 约等于 0.1627
 - 输出 json 中的 validation_cache_paths / test_cache_paths 必须和文档第 5.2 / 5.3 节逐条一致
+
+如果需要完全展开成 6 条显式 cache_path，也可以继续使用旧命令；两种写法的 provenance 是等价的。
+
+### 8.1.1 上游训练链的冻结入口
+
+如果要从“训练阶段”开始回看这条 baseline 的上游工作链，当前仓库里对应的冻结入口是：
+
+```bash
+python examples/my_strategy/run_dualseed_b12000_then_seed42_refcheck.py \
+   --validation-reference-summary-path /home/blueswhen/DL/qlib/examples/my_strategy/tra_global_validation_best_tra18_residual_step1_20260506_1.txt \
+   --test-reference-summary-path /home/blueswhen/DL/qlib/examples/my_strategy/tra_global_final_test_tra18_residual_step1_20260506_1.txt
+```
+
+这条命令的作用不是直接产出最终 baseline，而是冻结 dual-seed formal 和 seed42 refcheck 这段上游训练链，保证后续 old 6-cache provenance 有明确来源。
 
 ### 8.2 生成 current multiseed validation summary
 
@@ -534,6 +639,12 @@ python examples/my_strategy/run_current_best_multiseed_ensemble.py --validation-
 
 - 在 validation gate 通过时生成 [current_best_multiseed_ensemble_final_test.txt](current_best_multiseed_ensemble_final_test.txt)
 
+当前结论：
+
+- 这一步无需再跑。
+- 因为 [current_best_multiseed_ensemble_validation.txt](current_best_multiseed_ensemble_validation.txt) 已经明确给出 `validation_improves_current_best=False`。
+- 按本文冻结口径，current multiseed 这条支线不可能超过已冻结的 true best baseline，因此没有继续 materialize final test summary 的必要。
+
 命令：
 
 ```bash
@@ -545,6 +656,7 @@ python examples/my_strategy/run_current_best_multiseed_ensemble.py
 - 这条命令不保证一定产出 [current_best_multiseed_ensemble_final_test.txt](current_best_multiseed_ensemble_final_test.txt)
 - 只有 validation_improves_current_best=True 时，脚本才会继续跑 test 并写这个 summary
 - 如果只看到 validation summary 而没有 final test summary，先读 validation summary 最后一行的 validation_improves_current_best，而不是先怀疑路径写错
+- 在当前 workspace 的实际状态下，这一步已经可以视为终止，不建议再执行
 
 如果下游只需要 test 侧 provenance，而不要求完整 final test 指标 summary，可以运行：
 
@@ -564,6 +676,12 @@ python examples/my_strategy/run_current_best_multiseed_ensemble.py --materialize
 
 - 先用 current multiseed provenance 跑 validation-only search
 - 如果已经有 test summary，再对 validation winner 跑 1 次 test
+
+当前结论：
+
+- 这一步也无需再跑。
+- 这条 current-basis 300 空间支线不属于本文冻结的 true best baseline 工作链。
+- 结合第 6.5 节结论，current multiseed validation 已经没有继续搜索或继续 test 的价值，因此这里的命令只保留作历史参考。
 
 先只跑 validation-only：
 
@@ -589,6 +707,30 @@ python examples/my_strategy/run_rank_ensemble_tra_alpha360_once.py \
   --force-recompute \
    --validation-summary-path /home/blueswhen/DL/qlib/examples/my_strategy/current_best_multiseed_ensemble_validation.txt
 ```
+
+如果要用 fast path 分片并行跑 300 空间：
+
+```bash
+python examples/my_strategy/run_rank_ensemble_tra_alpha360_once.py \
+   --validation-only \
+   --strategy-profile 300 \
+   --output-prefix examples/my_strategy/tmp/tra_rank_ensemble_3seed_fast_300_YYYYMMDD \
+   --num-shards 5 \
+   --shard-index 0 \
+   --validation-summary-path /home/blueswhen/DL/qlib/examples/my_strategy/current_best_multiseed_ensemble_validation.txt
+```
+
+同类命令把 `--shard-index` 改为 1 / 2 / 3 / 4。全部完成后合并：
+
+```bash
+python examples/my_strategy/run_rank_ensemble_tra_alpha360_once.py \
+   --strategy-profile 300 \
+   --output-prefix examples/my_strategy/tmp/tra_rank_ensemble_3seed_fast_300_YYYYMMDD \
+   --num-shards 5 \
+   --merge-shards
+```
+
+如果只跑 TRA true-best 72 空间，把 `--strategy-profile 300` 改成 `--strategy-profile tra-best-72`。
 
 如果 validation/test summaries 都齐全，并且要强制全量重算再跑 test-once：
 

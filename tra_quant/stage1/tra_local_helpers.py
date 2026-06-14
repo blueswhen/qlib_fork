@@ -9,7 +9,7 @@ import pandas as pd
 
 BASE_DIR = Path(__file__).resolve().parent
 FUSION_CACHE_DIR = BASE_DIR / "fusion_cache"
-LOCAL_DATA_DIR = (BASE_DIR.parent / "training_data" / "cn_data_latest").resolve()
+LOCAL_DATA_DIR = (BASE_DIR.parent.parent / "training_data" / "cn_data_latest").resolve()
 
 _SOURCE_WORKSPACE = "/home/blueswhen/DL/qlib/examples/my_strategy"
 _SOURCE_DATA_DIR = "/home/blueswhen/.qlib/qlib_data/cn_data_latest"
