@@ -1436,6 +1436,20 @@ def _write_dual_seed_summary(
     test_base_runs: dict[int, dict],
     output_path: Path,
 ):
+    lines = [
+        f"seeds={seeds}",
+        f"seed_count={len(seeds)}",
+        f"strategy_count={len(STRATEGY_TRIALS) if rows else 0}",
+        f"row_count={len(rows)}",
+        f"valid_base_runs={valid_base_runs}",
+        f"test_base_runs={test_base_runs}",
+        "top_validation_score_min=",
+    ]
+    if not rows:
+        lines.extend(["top_test_ann_min=", "top_joint_rank_score="])
+        output_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        return
+
     df = pd.DataFrame(rows)
     grouped = (
         df.groupby("strategy_trial", as_index=False)
@@ -1455,15 +1469,6 @@ def _write_dual_seed_summary(
     robust_test = grouped.sort_values(["test_ann_min", "validation_score_min"], ascending=[False, False]).head(10)
     joint_best = grouped.sort_values("joint_rank_score", ascending=False).head(10)
 
-    lines = [
-        f"seeds={seeds}",
-        f"seed_count={len(seeds)}",
-        f"strategy_count={len(STRATEGY_TRIALS)}",
-        f"row_count={len(rows)}",
-        f"valid_base_runs={valid_base_runs}",
-        f"test_base_runs={test_base_runs}",
-        "top_validation_score_min=",
-    ]
     lines.extend(
         f"{row.strategy_trial}|validation_score_min={row.validation_score_min}|test_ann_min={row.test_ann_min}|test_ann_mean={row.test_ann_mean}"
         for row in robust_valid.itertuples(index=False)
@@ -1497,6 +1502,7 @@ def run_dual_seed_study(
     max_extra_swap_gb: float,
     resource_poll_seconds: float,
     smoke_epochs: int,
+    base_only: bool,
 ):
     if model_family != "tra":
         raise ValueError("dual-seed study currently supports only model_family='tra'")
@@ -1581,8 +1587,20 @@ def run_dual_seed_study(
         baseline_swap_used_gb=baseline_swap_used_gb,
     )
 
-    grid_path = _dual_seed_path(DUAL_SEED_GRID_PATH, result_suffix)
     summary_path = _dual_seed_path(DUAL_SEED_SUMMARY_PATH, result_suffix)
+    if base_only:
+        _write_dual_seed_summary(
+            [],
+            seeds=seeds,
+            valid_base_runs=valid_base_runs,
+            test_base_runs=test_base_runs,
+            output_path=summary_path,
+        )
+        print(f"dual-seed base-only summary saved to {summary_path}")
+        print(f"dual-seed resource log saved to {resource_log_path}")
+        return
+
+    grid_path = _dual_seed_path(DUAL_SEED_GRID_PATH, result_suffix)
     rows = _build_dual_seed_grid(
         model_trial,
         seeds=seeds,
@@ -1909,6 +1927,7 @@ if __name__ == "__main__":
     parser.add_argument("--reuse-test-cache", default="", help="Existing test-segment base cache to reuse instead of rerunning final-test rolling base evaluation.")
     parser.add_argument("--reuse-test-result-path", default="", help="Optional existing final-test rolling result summary path recorded alongside --reuse-test-cache.")
     parser.add_argument("--dual-seed-study", action="store_true", help="Run dual-seed TRA base training and enumerate each seed's 180 validation/test strategy rows.")
+    parser.add_argument("--dual-seed-base-only", action="store_true", help="For --dual-seed-study, stop after fresh validation/test base caches and write a base-run summary without the slow strategy grid.")
     parser.add_argument("--smoke-only", action="store_true", help="For dual-seed study, run only the shared-handler base-training smoke test and stop early.")
     parser.add_argument("--seeds", default=",".join(str(seed) for seed in DUAL_SEED_DEFAULT_SEEDS), help="Comma-separated seeds for dual-seed study.")
     parser.add_argument("--batch-size", type=int, default=DUAL_SEED_BATCH_SIZE, help="Batch size used by dual-seed base training.")
@@ -1940,6 +1959,7 @@ if __name__ == "__main__":
             max_extra_swap_gb=args.max_extra_swap_gb,
             resource_poll_seconds=args.resource_poll_seconds,
             smoke_epochs=args.smoke_epochs,
+            base_only=args.dual_seed_base_only,
         )
     else:
         main(

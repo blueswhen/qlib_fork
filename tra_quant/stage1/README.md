@@ -21,6 +21,40 @@ TRA baseline.
 The six required seed caches are kept in `tra_cache/`. Non-best historical
 artifacts were intentionally removed from this directory.
 
+## Retrain Seed42 Cache
+
+Do not use `tune_tra_alpha360_strict.py` to regenerate the frozen seed42
+cache. That legacy strict entry does not pass the authoritative global/refcheck
+model override (`eval_freq=5`) and can produce a different prediction cache.
+
+Use this seed42 refcheck entry instead:
+
+```bash
+cd /home/blueswhen/DL/qlib_fork/tra_quant/stage1
+export PYTHONPATH=/home/blueswhen/DL/qlib_fork/tra_quant/stage1:/home/blueswhen/DL/qlib_fork:$PYTHONPATH
+export QLIB_PROVIDER_URI=/home/blueswhen/DL/qlib_fork/training_data/cn_data_latest
+./train_stage1_tra.sh \
+  --suffix seed42_refcheck_retrain_20260620_1 \
+  --gpu-slots 0,1 \
+  --provider-uri /home/blueswhen/DL/qlib_fork/training_data/cn_data_latest
+```
+
+The command above is equivalent to `python retrain_seed42_refcheck.py ...`.
+It retrains the valid cache with `risk_degree=0.70` and the test cache with
+`risk_degree=0.85`, using `batch_size=16384`, deterministic runtime, and the
+global TRA h5 model config.
+
+After retraining, verify the regenerated cache against the frozen baseline:
+
+```bash
+cd /home/blueswhen/DL/qlib_fork/tra_quant/stage1
+python verify_seed42_refcheck.py --suffix seed42_refcheck_retrain_20260620_1
+```
+
+Expected cache-level result is exact equality for both `pred` and `label`
+(`max_abs=0.0`). A same-seed run with a different batch size, `eval_freq`, or
+entry script is a new experiment, not a reproduction of this frozen baseline.
+
 ## Reproduce TRA-Only Best
 
 ```bash

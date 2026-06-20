@@ -79,11 +79,24 @@ def _persist(rows: list[dict], path: Path) -> None:
     )
 
 
-def _load_rank_ensemble_validation(result_suffix: str) -> tuple[dict, pd.DataFrame, pd.DataFrame]:
+def _load_rank_ensemble_validation(
+    result_suffix: str,
+    *,
+    validation_summary_path: Path | None = None,
+    repro_json_path: Path | None = None,
+) -> tuple[dict, pd.DataFrame, pd.DataFrame]:
     runner = stage2._load_rank_ensemble_runner()
     tra_mod = runner.load_module()
-    validation_summary_path = stage2.TRA_BEST_VALIDATION_SUMMARY_PATH.resolve()
-    repro_json_path = stage2.TRA_BEST_REPRO_JSON_PATH.resolve()
+    validation_summary_path = (
+        validation_summary_path.expanduser().resolve()
+        if validation_summary_path is not None
+        else stage2.TRA_BEST_VALIDATION_SUMMARY_PATH.resolve()
+    )
+    repro_json_path = (
+        repro_json_path.expanduser().resolve()
+        if repro_json_path is not None
+        else stage2.TRA_BEST_REPRO_JSON_PATH.resolve()
+    )
     payload = json.loads(repro_json_path.read_text(encoding="utf-8"))
     validation_wrapper = stage2._parse_summary_file(validation_summary_path)
     valid_cache_paths = runner._load_seed_cache_paths(validation_summary_path, "seed_runs_valid")

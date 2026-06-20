@@ -58,6 +58,41 @@ The authoritative artifacts are:
 
 The six referenced TRA seed caches are kept in `tra_cache/`.
 
+## Seed42 Retraining Correction
+
+The authoritative seed42 cache must be retrained through the global/refcheck
+configuration, not `tune_tra_alpha360_strict.py`. The strict entry omits the
+frozen global model override used by the baseline, most importantly
+`eval_freq=5`; using it can reproduce the labels but produce different
+predictions.
+
+Correct command:
+
+```bash
+cd /home/blueswhen/DL/qlib_fork/tra_quant/stage1
+export PYTHONPATH=/home/blueswhen/DL/qlib_fork/tra_quant/stage1:/home/blueswhen/DL/qlib_fork:$PYTHONPATH
+export QLIB_PROVIDER_URI=/home/blueswhen/DL/qlib_fork/training_data/cn_data_latest
+python retrain_seed42_refcheck.py \
+  --suffix seed42_refcheck_retrain_20260620_1 \
+  --gpu-slots 0,1 \
+  --provider-uri /home/blueswhen/DL/qlib_fork/training_data/cn_data_latest
+```
+
+Then verify with:
+
+```bash
+python verify_seed42_refcheck.py --suffix seed42_refcheck_retrain_20260620_1
+```
+
+Verified seed42 valid reproduction on 2026-06-20:
+
+```text
+IC=0.02757476988385409
+Rank IC=0.04134057587363596
+pred max_abs=0.0
+label max_abs=0.0
+```
+
 ## Reproduce
 
 ```bash

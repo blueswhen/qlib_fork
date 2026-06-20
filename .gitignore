@@ -39,6 +39,8 @@ test-output.xml
 
 # special software
 mlruns/
+tra_quant/runs/
+tra_quant/retrain_best_baseline_from_zero_*.log
 
 tags
 

@@ -42,12 +42,16 @@ def _parse_summary(path: Path) -> dict:
     return data
 
 
-def _load_rank_ensemble_test() -> tuple[dict, pd.DataFrame, pd.DataFrame, int, list[Path]]:
+def _load_rank_ensemble_test(
+    *,
+    validation_summary_path: Path,
+    final_test_summary_path: Path,
+) -> tuple[dict, pd.DataFrame, pd.DataFrame, int, list[Path]]:
     runner = stage2._load_rank_ensemble_runner()
     tra_mod = runner.load_module()
-    validation_summary = _parse_summary(stage2.TRA_BEST_VALIDATION_SUMMARY_PATH)
-    final_summary = _parse_summary(stage2.TRA_BEST_FINAL_TEST_SUMMARY_PATH)
-    test_cache_paths = runner._load_seed_cache_paths(stage2.TRA_BEST_FINAL_TEST_SUMMARY_PATH, "seed_runs_test")
+    validation_summary = _parse_summary(validation_summary_path)
+    final_summary = _parse_summary(final_test_summary_path)
+    test_cache_paths = runner._load_seed_cache_paths(final_test_summary_path, "seed_runs_test")
     test_pred, test_label, test_common_rows = runner.rank_ensemble_signal(tra_mod, test_cache_paths)
     tra_validation = {
         "window_key": validation_summary["window_key"],
@@ -56,8 +60,8 @@ def _load_rank_ensemble_test() -> tuple[dict, pd.DataFrame, pd.DataFrame, int, l
         "test": validation_summary["test"],
         "handler_kwargs_extra": stage2.TRA_RANK_ENSEMBLE_HANDLER_KWARGS,
         "stage1_source": "rank_ensemble",
-        "stage1_validation_summary_path": str(stage2.TRA_BEST_VALIDATION_SUMMARY_PATH),
-        "stage1_final_test_summary_path": str(stage2.TRA_BEST_FINAL_TEST_SUMMARY_PATH),
+        "stage1_validation_summary_path": str(validation_summary_path),
+        "stage1_final_test_summary_path": str(final_test_summary_path),
         "stage1_final_test_seed_cache_paths": [str(path) for path in test_cache_paths],
         "stage1_test_common_rows": int(test_common_rows),
         "stage1_final_summary": final_summary,
@@ -122,6 +126,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--output-prefix", type=Path, default=DEFAULT_OUTPUT_PREFIX)
     parser.add_argument("--result-suffix", default=DEFAULT_RESULT_SUFFIX)
     parser.add_argument(
+        "--stage1-validation-summary-path",
+        type=Path,
+        default=stage2.TRA_BEST_VALIDATION_SUMMARY_PATH,
+        help="stage1 validation wrapper summary produced by this run",
+    )
+    parser.add_argument(
+        "--stage1-final-test-summary-path",
+        type=Path,
+        default=stage2.TRA_BEST_FINAL_TEST_SUMMARY_PATH,
+        help="stage1 final-test wrapper summary produced by this run",
+    )
+    parser.add_argument(
         "--signal-profile",
         choices=["robust-tiny", "robust-small", "announcement-small", "cash-announcement-small"],
         default="robust-small",
@@ -137,7 +153,10 @@ def main() -> None:
 
     selected_row = _select_cv_row(args.cv_grid_path, args.trial_name)
     strategy_trial = _strategy_from_name(str(selected_row["strategy_trial"]))
-    tra_validation, test_seq_pred, test_seq_label, test_common_rows, test_cache_paths = _load_rank_ensemble_test()
+    tra_validation, test_seq_pred, test_seq_label, test_common_rows, test_cache_paths = _load_rank_ensemble_test(
+        validation_summary_path=args.stage1_validation_summary_path.expanduser().resolve(),
+        final_test_summary_path=args.stage1_final_test_summary_path.expanduser().resolve(),
+    )
     test_pred, test_label = _signal_from_name(
         str(selected_row["signal_name"]),
         test_seq_pred,

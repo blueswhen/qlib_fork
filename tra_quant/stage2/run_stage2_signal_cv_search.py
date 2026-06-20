@@ -594,7 +594,11 @@ def run_shard(args: argparse.Namespace) -> None:
     output_csv_path = _grid_path(output_prefix)
     output_summary_path = _summary_path(output_prefix)
 
-    tra_validation, seq_pred, seq_label = fast._load_rank_ensemble_validation(args.result_suffix)
+    tra_validation, seq_pred, seq_label = fast._load_rank_ensemble_validation(
+        args.result_suffix,
+        validation_summary_path=args.stage1_validation_summary_path,
+        repro_json_path=args.stage1_repro_json_path,
+    )
     signal_candidates = _build_cv_signal_candidates(seq_pred, seq_label, profile=args.signal_profile)
     strategy_trials = _strategy_trials(args.strategy_profile)
     all_candidates = [
@@ -719,6 +723,10 @@ def launch_shards(args: argparse.Namespace) -> None:
             args.signal_profile,
             "--strategy-profile",
             args.strategy_profile,
+            "--stage1-validation-summary-path",
+            str(args.stage1_validation_summary_path),
+            "--stage1-repro-json-path",
+            str(args.stage1_repro_json_path),
             "--num-shards",
             str(args.num_shards),
             "--shard-index",
@@ -758,6 +766,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--launch-shards", action="store_true")
     parser.add_argument("--log-dir", type=Path, default=BASE_DIR / "logs" / "stage2_signal_cv")
     parser.add_argument("--force-recompute", action="store_true")
+    parser.add_argument(
+        "--stage1-validation-summary-path",
+        type=Path,
+        default=stage2.TRA_BEST_VALIDATION_SUMMARY_PATH,
+        help="stage1 validation wrapper summary produced by this run",
+    )
+    parser.add_argument(
+        "--stage1-repro-json-path",
+        type=Path,
+        default=stage2.TRA_BEST_REPRO_JSON_PATH,
+        help="stage1 rank-ensemble repro JSON produced by this run",
+    )
     return parser.parse_args()
 
 
