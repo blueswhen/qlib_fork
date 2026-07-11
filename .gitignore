@@ -41,6 +41,7 @@ test-output.xml
 mlruns/
 tra_quant/runs/
 tra_quant/retrain_best_baseline_from_zero_*.log
+training_data/tushare/
 
 tags
 
