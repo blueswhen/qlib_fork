@@ -1,0 +1,6 @@
+{
+  "created_at_utc": "2026-07-11T06:38:01.577368+00:00",
+  "immutable_lock": "/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/locked_candidate_pretest_immutable.json",
+  "immutable_lock_sha256": "9060ff790b3f63de37539b479a3c3bd5b51404823f62622bc4695911a5a1408c",
+  "assertion": "no test cache or final output existed when this checkpoint was written"
+}

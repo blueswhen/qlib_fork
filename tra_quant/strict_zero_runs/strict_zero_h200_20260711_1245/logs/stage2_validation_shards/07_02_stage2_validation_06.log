@@ -1,0 +1,156 @@
+[2026-07-11 13:28:23] START 02_stage2_validation_06
+cmd=['/home/niushengxiao/miniconda3/envs/py310/bin/python', 'h200_quarter_stability_selector.py', '--valid-summary-path', '/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage1/tra_global_dual_seed_pattern_summary_strict_zero_h200_20260711_1245_b12000_valid.txt', '--output-prefix', '/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/validation_trial_06', '--combo', '5678,2050,2044', '--signal-profile', 'cash-quality-quick', '--strategy-profiles', 'stable-cash-quick', '--segment-levels', 'year,half,quarter', '--trial-name', 'cash_quality_z_tw001__prac_m000_hold7_r09', '--force-recompute']
+cwd=/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2
+
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+
+backtest loop:   0%|          | 0/728 [00:00<?, ?it/s]
+backtest loop:   5%|▍         | 33/728 [00:00<00:02, 328.71it/s]
+backtest loop:   9%|▉         | 66/728 [00:00<00:02, 329.32it/s]
+backtest loop:  14%|█▎        | 99/728 [00:00<00:01, 329.19it/s]
+backtest loop:  18%|█▊        | 132/728 [00:00<00:01, 329.17it/s]
+backtest loop:  23%|██▎       | 166/728 [00:00<00:01, 330.88it/s]
+backtest loop:  27%|██▋       | 200/728 [00:00<00:01, 328.71it/s]
+backtest loop:  32%|███▏      | 233/728 [00:00<00:01, 324.97it/s]
+backtest loop:  37%|███▋      | 267/728 [00:00<00:01, 326.86it/s]
+backtest loop:  41%|████      | 300/728 [00:00<00:01, 326.52it/s]
+backtest loop:  46%|████▌     | 333/728 [00:01<00:01, 326.37it/s]
+backtest loop:  50%|█████     | 367/728 [00:01<00:01, 329.13it/s]
+backtest loop:  55%|█████▍    | 400/728 [00:01<00:00, 328.68it/s]
+backtest loop:  59%|█████▉    | 433/728 [00:01<00:00, 327.11it/s]
+backtest loop:  64%|██████▍   | 467/728 [00:01<00:00, 328.69it/s]
+backtest loop:  69%|██████▉   | 501/728 [00:01<00:00, 329.77it/s]
+backtest loop:  73%|███████▎  | 535/728 [00:01<00:00, 330.05it/s]
+backtest loop:  78%|███████▊  | 569/728 [00:01<00:00, 331.68it/s]
+backtest loop:  83%|████████▎ | 603/728 [00:01<00:00, 331.06it/s]
+backtest loop:  88%|████████▊ | 637/728 [00:01<00:00, 328.70it/s]
+backtest loop:  92%|█████████▏| 670/728 [00:02<00:00, 328.76it/s]
+backtest loop:  97%|█████████▋| 704/728 [00:02<00:00, 330.59it/s]
+backtest loop: 100%|██████████| 728/728 [00:02<00:00, 329.06it/s]
+
+backtest loop:   0%|          | 0/243 [00:00<?, ?it/s]
+backtest loop:  12%|█▏        | 29/243 [00:00<00:01, 117.35it/s]
+backtest loop:  26%|██▌       | 62/243 [00:00<00:00, 194.19it/s]
+backtest loop:  39%|███▊      | 94/243 [00:00<00:00, 236.76it/s]
+backtest loop:  52%|█████▏    | 127/243 [00:00<00:00, 266.43it/s]
+backtest loop:  66%|██████▌   | 160/243 [00:00<00:00, 285.82it/s]
+backtest loop:  79%|███████▊  | 191/243 [00:00<00:00, 289.75it/s]
+backtest loop:  92%|█████████▏| 224/243 [00:00<00:00, 299.96it/s]
+backtest loop: 100%|██████████| 243/243 [00:00<00:00, 264.90it/s]
+
+backtest loop:   0%|          | 0/243 [00:00<?, ?it/s]
+backtest loop:  12%|█▏        | 29/243 [00:00<00:00, 229.75it/s]
+backtest loop:  25%|██▌       | 61/243 [00:00<00:00, 276.91it/s]
+backtest loop:  38%|███▊      | 92/243 [00:00<00:00, 291.09it/s]
+backtest loop:  51%|█████▏    | 125/243 [00:00<00:00, 305.86it/s]
+backtest loop:  65%|██████▌   | 158/243 [00:00<00:00, 314.25it/s]
+backtest loop:  78%|███████▊  | 190/243 [00:00<00:00, 315.78it/s]
+backtest loop:  92%|█████████▏| 223/243 [00:00<00:00, 317.66it/s]
+backtest loop: 100%|██████████| 243/243 [00:00<00:00, 306.82it/s]
+
+backtest loop:   0%|          | 0/242 [00:00<?, ?it/s]
+backtest loop:  12%|█▏        | 29/242 [00:00<00:01, 201.86it/s]
+backtest loop:  26%|██▌       | 62/242 [00:00<00:00, 262.44it/s]
+backtest loop:  39%|███▉      | 95/242 [00:00<00:00, 290.13it/s]
+backtest loop:  53%|█████▎    | 128/242 [00:00<00:00, 302.31it/s]
+backtest loop:  67%|██████▋   | 161/242 [00:00<00:00, 308.63it/s]
+backtest loop:  80%|███████▉  | 193/242 [00:00<00:00, 310.29it/s]
+backtest loop:  93%|█████████▎| 226/242 [00:00<00:00, 315.50it/s]
+backtest loop: 100%|██████████| 242/242 [00:00<00:00, 301.16it/s]
+
+backtest loop:   0%|          | 0/117 [00:00<?, ?it/s]
+backtest loop:  25%|██▍       | 29/117 [00:00<00:00, 224.11it/s]
+backtest loop:  53%|█████▎    | 62/117 [00:00<00:00, 276.85it/s]
+backtest loop:  82%|████████▏ | 96/117 [00:00<00:00, 300.87it/s]
+backtest loop: 100%|██████████| 117/117 [00:00<00:00, 295.11it/s]
+
+backtest loop:   0%|          | 0/126 [00:00<?, ?it/s]
+backtest loop:  23%|██▎       | 29/126 [00:00<00:00, 255.92it/s]
+backtest loop:  49%|████▉     | 62/126 [00:00<00:00, 295.29it/s]
+backtest loop:  75%|███████▌  | 95/126 [00:00<00:00, 309.42it/s]
+backtest loop: 100%|██████████| 126/126 [00:00<00:00, 307.86it/s]
+
+backtest loop:   0%|          | 0/118 [00:00<?, ?it/s]
+backtest loop:  25%|██▍       | 29/118 [00:00<00:00, 245.88it/s]
+backtest loop:  51%|█████     | 60/118 [00:00<00:00, 278.96it/s]
+backtest loop:  78%|███████▊  | 92/118 [00:00<00:00, 296.46it/s]
+backtest loop: 100%|██████████| 118/118 [00:00<00:00, 296.12it/s]
+
+backtest loop:   0%|          | 0/125 [00:00<?, ?it/s]
+backtest loop:  23%|██▎       | 29/125 [00:00<00:00, 232.36it/s]
+backtest loop:  50%|█████     | 63/125 [00:00<00:00, 288.60it/s]
+backtest loop:  77%|███████▋  | 96/125 [00:00<00:00, 304.76it/s]
+backtest loop: 100%|██████████| 125/125 [00:00<00:00, 301.15it/s]
+
+backtest loop:   0%|          | 0/117 [00:00<?, ?it/s]
+backtest loop:  25%|██▍       | 29/117 [00:00<00:00, 230.79it/s]
+backtest loop:  53%|█████▎    | 62/117 [00:00<00:00, 281.44it/s]
+backtest loop:  81%|████████  | 95/117 [00:00<00:00, 301.47it/s]
+backtest loop: 100%|██████████| 117/117 [00:00<00:00, 292.88it/s]
+
+backtest loop:   0%|          | 0/125 [00:00<?, ?it/s]
+backtest loop:  23%|██▎       | 29/125 [00:00<00:00, 227.80it/s]
+backtest loop:  50%|████▉     | 62/125 [00:00<00:00, 280.82it/s]
+backtest loop:  77%|███████▋  | 96/125 [00:00<00:00, 305.44it/s]
+backtest loop: 100%|██████████| 125/125 [00:00<00:00, 299.78it/s]
+
+backtest loop:   0%|          | 0/58 [00:00<?, ?it/s]
+backtest loop:  50%|█████     | 29/58 [00:00<00:00, 235.80it/s]
+backtest loop: 100%|██████████| 58/58 [00:00<00:00, 267.30it/s]
+
+backtest loop:   0%|          | 0/59 [00:00<?, ?it/s]
+backtest loop:  49%|████▉     | 29/59 [00:00<00:00, 273.84it/s]
+backtest loop: 100%|██████████| 59/59 [00:00<00:00, 299.33it/s]
+
+backtest loop:   0%|          | 0/66 [00:00<?, ?it/s]
+backtest loop:  44%|████▍     | 29/66 [00:00<00:00, 264.07it/s]
+backtest loop:  94%|█████████▍| 62/66 [00:00<00:00, 299.75it/s]
+backtest loop: 100%|██████████| 66/66 [00:00<00:00, 294.89it/s]
+
+backtest loop:   0%|          | 0/60 [00:00<?, ?it/s]
+backtest loop:  48%|████▊     | 29/60 [00:00<00:00, 265.05it/s]
+backtest loop: 100%|██████████| 60/60 [00:00<00:00, 293.35it/s]
+
+backtest loop:   0%|          | 0/58 [00:00<?, ?it/s]
+backtest loop:  52%|█████▏    | 30/58 [00:00<00:00, 295.63it/s]
+backtest loop: 100%|██████████| 58/58 [00:00<00:00, 314.84it/s]
+
+backtest loop:   0%|          | 0/60 [00:00<?, ?it/s]
+backtest loop:  48%|████▊     | 29/60 [00:00<00:00, 259.53it/s]
+backtest loop: 100%|██████████| 60/60 [00:00<00:00, 295.66it/s]
+
+backtest loop:   0%|          | 0/64 [00:00<?, ?it/s]
+backtest loop:  45%|████▌     | 29/64 [00:00<00:00, 248.17it/s]
+backtest loop:  98%|█████████▊| 63/64 [00:00<00:00, 296.73it/s]
+backtest loop: 100%|██████████| 64/64 [00:00<00:00, 286.20it/s]
+
+backtest loop:   0%|          | 0/61 [00:00<?, ?it/s]
+backtest loop:  48%|████▊     | 29/61 [00:00<00:00, 248.73it/s]
+backtest loop:  98%|█████████▊| 60/61 [00:00<00:00, 278.14it/s]
+backtest loop: 100%|██████████| 61/61 [00:00<00:00, 271.67it/s]
+
+backtest loop:   0%|          | 0/58 [00:00<?, ?it/s]
+backtest loop:  50%|█████     | 29/58 [00:00<00:00, 250.61it/s]
+backtest loop: 100%|██████████| 58/58 [00:00<00:00, 285.66it/s]
+
+backtest loop:   0%|          | 0/59 [00:00<?, ?it/s]
+backtest loop:  49%|████▉     | 29/59 [00:00<00:00, 260.58it/s]
+backtest loop: 100%|██████████| 59/59 [00:00<00:00, 291.00it/s]
+
+backtest loop:   0%|          | 0/65 [00:00<?, ?it/s]
+backtest loop:  45%|████▍     | 29/65 [00:00<00:00, 251.63it/s]
+backtest loop:  94%|█████████▍| 61/65 [00:00<00:00, 285.15it/s]
+backtest loop: 100%|██████████| 65/65 [00:00<00:00, 281.72it/s]
+
+backtest loop:   0%|          | 0/60 [00:00<?, ?it/s]
+backtest loop:  48%|████▊     | 29/60 [00:00<00:00, 270.34it/s]
+backtest loop: 100%|██████████| 60/60 [00:00<00:00, 299.76it/s]
+combo=5678,2050,2044 trial=cash_quality_z_tw001__prac_m000_hold7_r09 stress_pass=False full_ann=0.23359937439002834 year_min=0.27520807884181864 quarter_min=-0.21154303685339115 quarter_pos=0.75
+/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/validation_trial_06_grid.csv
+/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/validation_trial_06_segment_detail.csv
+/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/validation_trial_06_summary.json
+
+[2026-07-11 14:18:50] END 02_stage2_validation_06 status=0

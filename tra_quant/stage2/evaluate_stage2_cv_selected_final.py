@@ -17,7 +17,7 @@ DEFAULT_CV_GRID = BASE_DIR / "tmp" / "stage2_cv_robust_small_stable_core_2026061
 DEFAULT_RESULT_SUFFIX = "stage2_cv_cash_quality_z001_hold7r085_final_20260613_1"
 DEFAULT_OUTPUT_PREFIX = BASE_DIR / "tmp" / DEFAULT_RESULT_SUFFIX
 TARGET_TEST_ANN = 0.22004029352797247
-CURRENT_BEST_TEST_ANN = 0.2643467300531994
+CURRENT_BEST_TEST_ANN = 0.2804402793535583
 SELECTION_RULE = {
     "full_ann_min": 0.24,
     "year_ann_min_min": 0.22,
@@ -89,11 +89,11 @@ def _select_cv_row(cv_grid_path: Path, trial_name: str | None) -> dict:
     return selected.iloc[0].to_dict()
 
 
-def _strategy_from_name(strategy_trial_name: str) -> dict:
-    for strategy_trial in cv._strategy_trials("stable-core"):
+def _strategy_from_name(strategy_trial_name: str, strategy_profile: str) -> dict:
+    for strategy_trial in cv._strategy_trials(strategy_profile):
         if strategy_trial["trial_name"] == strategy_trial_name:
             return strategy_trial
-    raise ValueError(f"strategy not found in stable-core profile: {strategy_trial_name}")
+    raise ValueError(f"strategy not found in {strategy_profile} profile: {strategy_trial_name}")
 
 
 def _signal_from_name(
@@ -107,7 +107,7 @@ def _signal_from_name(
     for candidate in candidates:
         if candidate["signal_name"] == signal_name:
             return candidate["pred"].sort_index(), candidate["label"].sort_index()
-    raise ValueError(f"signal not found in robust-small profile: {signal_name}")
+    raise ValueError(f"signal not found in {signal_profile} profile: {signal_name}")
 
 
 def _write_text_summary(summary: dict, path: Path) -> None:
@@ -139,11 +139,45 @@ def parse_args() -> argparse.Namespace:
     )
     parser.add_argument(
         "--signal-profile",
-        choices=["robust-tiny", "robust-small", "announcement-small", "cash-announcement-small"],
+        choices=[
+            "robust-tiny",
+            "robust-small",
+            "cash-quality-quick",
+            "valuation-quick",
+            "valuation-deep",
+            "announcement-small",
+            "cash-announcement-small",
+        ],
         default="robust-small",
+    )
+    parser.add_argument(
+        "--strategy-profile",
+        choices=[
+            "stable-tiny",
+            "stable-core",
+            "stable-cash-quick",
+            "stable-quick",
+            "stable-focused",
+            "stable-wide",
+            "stable-risk-fine",
+            "stable-quarter",
+        ],
+        default="stable-core",
     )
     parser.add_argument("--target-test-ann", type=float, default=CURRENT_BEST_TEST_ANN)
     parser.add_argument("--fast-mode", action="store_true", default=True)
+    parser.add_argument("--selection-scope", default="validation_cv_only")
+    parser.add_argument(
+        "--test-usage-policy",
+        default="single_final_evaluation_after_cv_candidate_fixed",
+    )
+    parser.add_argument("--base-model-trial", default="rank_ensemble_3seed_tra72_old6")
+    parser.add_argument(
+        "--existing-fused-cache-path",
+        type=Path,
+        default=None,
+        help="Reuse an already frozen test signal cache when recovering an interrupted report write.",
+    )
     return parser.parse_args()
 
 
@@ -152,20 +186,27 @@ def main() -> None:
     args.output_prefix.parent.mkdir(parents=True, exist_ok=True)
 
     selected_row = _select_cv_row(args.cv_grid_path, args.trial_name)
-    strategy_trial = _strategy_from_name(str(selected_row["strategy_trial"]))
+    strategy_trial = _strategy_from_name(str(selected_row["strategy_trial"]), args.strategy_profile)
     tra_validation, test_seq_pred, test_seq_label, test_common_rows, test_cache_paths = _load_rank_ensemble_test(
         validation_summary_path=args.stage1_validation_summary_path.expanduser().resolve(),
         final_test_summary_path=args.stage1_final_test_summary_path.expanduser().resolve(),
     )
-    test_pred, test_label = _signal_from_name(
-        str(selected_row["signal_name"]),
-        test_seq_pred,
-        test_seq_label,
-        signal_profile=args.signal_profile,
-    )
-
     recorder_name = f"{selected_row['trial_name']}_{args.result_suffix}_test"
-    cache_path = stage2._write_fused_cache(recorder_name, test_pred, test_label)
+    if args.existing_fused_cache_path is not None:
+        cache_path = args.existing_fused_cache_path.expanduser().resolve()
+        if not cache_path.exists():
+            raise FileNotFoundError(f"missing frozen fused cache: {cache_path}")
+        cache_payload = pd.read_pickle(cache_path)
+        test_pred = cache_payload["pred"].sort_index()
+        test_label = cache_payload["label"].sort_index()
+    else:
+        test_pred, test_label = _signal_from_name(
+            str(selected_row["signal_name"]),
+            test_seq_pred,
+            test_seq_label,
+            signal_profile=args.signal_profile,
+        )
+        cache_path = stage2._write_fused_cache(recorder_name, test_pred, test_label)
     metrics = stage2._evaluate_signal(
         recorder_name=recorder_name,
         pred=test_pred,
@@ -177,8 +218,8 @@ def main() -> None:
 
     summary = {
         "run_mode": "stage2_cv_selected_final_test_once",
-        "selection_scope": "validation_cv_only",
-        "test_usage_policy": "single_final_evaluation_after_cv_candidate_fixed",
+        "selection_scope": args.selection_scope,
+        "test_usage_policy": args.test_usage_policy,
         "target_test_ann": args.target_test_ann,
         "legacy_target_test_ann": TARGET_TEST_ANN,
         "current_best_test_ann": CURRENT_BEST_TEST_ANN,
@@ -190,12 +231,13 @@ def main() -> None:
         "train": tra_validation["train"],
         "valid": tra_validation["valid"],
         "test": tra_validation["test"],
-        "base_model_trial": "rank_ensemble_3seed_tra72_old6",
+        "base_model_trial": args.base_model_trial,
         "stage1_test_common_rows": test_common_rows,
         "stage1_test_seed_cache_paths": [str(path) for path in test_cache_paths],
         "signal_name": selected_row["signal_name"],
-        "signal_kind": selected_row["kind"],
+        "signal_kind": selected_row.get("kind", selected_row.get("signal_kind", "fused_stage2")),
         "signal_profile": args.signal_profile,
+        "strategy_profile": args.strategy_profile,
         "fundamental_feature_path": stage2.FUNDAMENTAL_FEATURE_PATH,
         "announcement_feature_path": (
             str(cv.ANNOUNCEMENT_DECAY_RANKPCT_FEATURE_PATH)
@@ -209,6 +251,7 @@ def main() -> None:
         "risk_degree": strategy_trial["risk_degree"],
         "kwargs_extra": strategy_trial["kwargs_extra"],
         "test_cache_path": str(cache_path),
+        "test_cache_reused_after_reporting_failure": args.existing_fused_cache_path is not None,
         "test_recorder_id": metrics["recorder_id"],
         "test_IC": metrics["IC"],
         "test_Rank_IC": metrics["Rank IC"],

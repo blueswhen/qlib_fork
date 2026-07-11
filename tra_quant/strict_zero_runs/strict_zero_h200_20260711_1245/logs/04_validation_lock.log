@@ -1,0 +1,14 @@
+[2026-07-11 14:37:59] START 04_validation_lock
+cmd=['/home/niushengxiao/miniconda3/envs/py310/bin/python', 'lock_h200_stress_gate_candidate.py', '--candidate-summary-path', '/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/validation_stress_candidate_summary.csv', '--valid-summary-path', '/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage1/tra_global_dual_seed_pattern_summary_strict_zero_h200_20260711_1245_b12000_valid.txt', '--output-prefix', '/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/locked_candidate', '--signal-profile', 'cash-quality-quick', '--target-test-ann', '0.2643467300531994', '--require-fused-stage2']
+cwd=/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2
+
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/locked_candidate_locked_manifest.json
+/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/locked_candidate_locked_validation_summary.txt
+/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/locked_candidate_locked_cv_row.csv
+locked_combo=5678,2050,2044 locked_trial=cash_quality_z_tw001__prac_m000_hold7_r095
+
+[2026-07-11 14:38:01] END 04_validation_lock status=0

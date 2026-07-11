@@ -1,0 +1,95 @@
+{
+  "run_mode": "h200_quarter_stability_selector",
+  "selection_scope": "validation_only_no_test_loaded",
+  "test_usage_policy": "test_not_loaded_not_used_for_selection_final_test_may_run_once_after_explicit_lock",
+  "valid_summary_paths": [
+    "/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage1/tra_global_dual_seed_pattern_summary_strict_zero_h200_20260711_1245_b12000_valid.txt"
+  ],
+  "combos": [
+    "5678,2050,2044"
+  ],
+  "signal_profile": "cash-quality-quick",
+  "strategy_profiles": [
+    "stable-cash-quick"
+  ],
+  "all_profile_trials": false,
+  "trial_names": [
+    "cash_quality_z_tw001__prac_m000_hold5_r085"
+  ],
+  "segment_levels": [
+    "year",
+    "half",
+    "quarter"
+  ],
+  "stress_gate": {
+    "gate_version": "v2_no_negative_valid_quarters_20260705",
+    "full_ann_min": 0.26,
+    "year_ann_min_min": 0.26,
+    "half_ann_min_min": 0.05,
+    "quarter_ann_min_min": 0.0,
+    "quarter_positive_ratio_min": 0.8,
+    "quarter_rankic_min": 0.02,
+    "quarter_rankic_positive_ratio_min": 1.0
+  },
+  "row_count": 1,
+  "stress_gate_pass_count": 0,
+  "grid_path": "/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/validation_trial_01_grid.csv",
+  "segment_detail_path": "/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/validation_trial_01_segment_detail.csv",
+  "top_validation_stress": [
+    {
+      "selector_key": "5678,2050,2044::cash_quality_z_tw001__prac_m000_hold5_r085",
+      "combo": "5678,2050,2044",
+      "trial_name": "cash_quality_z_tw001__prac_m000_hold5_r085",
+      "signal_name": "cash_quality_z_tw001",
+      "strategy_trial": "prac_m000_hold5_r085",
+      "strategy_profile": "stable-cash-quick",
+      "kind": "cash_quality_linear",
+      "valid_common_rows": 287568,
+      "tab_weight": 0.01,
+      "low_q": null,
+      "penalty": null,
+      "high_q": null,
+      "bonus": null,
+      "ann_weight": null,
+      "full_count": 1,
+      "full_ann_min": 0.23673196200161,
+      "full_ann_mean": 0.23673196200161,
+      "full_ann_median": 0.23673196200161,
+      "full_ann_std": 0.0,
+      "full_ann_positive_ratio": 1.0,
+      "full_rankic_min": 0.07467096363047035,
+      "full_rankic_mean": 0.07467096363047035,
+      "full_rankic_positive_ratio": 1.0,
+      "year_count": 3,
+      "year_ann_min": 0.12273555046494712,
+      "year_ann_mean": 0.2553758572229427,
+      "year_ann_median": 0.2706478695571586,
+      "year_ann_std": 0.10263527962895067,
+      "year_ann_positive_ratio": 1.0,
+      "year_rankic_min": 0.059194435532681985,
+      "year_rankic_mean": 0.07467889965629322,
+      "year_rankic_positive_ratio": 1.0,
+      "half_count": 6,
+      "half_ann_min": -0.16583449961192778,
+      "half_ann_mean": 0.1961103511898551,
+      "half_ann_median": 0.11370594664442896,
+      "half_ann_std": 0.25935120122137423,
+      "half_ann_positive_ratio": 0.8333333333333334,
+      "half_rankic_min": 0.0348064944862559,
+      "half_rankic_mean": 0.07463773562012053,
+      "half_rankic_positive_ratio": 1.0,
+      "quarter_count": 12,
+      "quarter_ann_min": -0.6037507383068124,
+      "quarter_ann_mean": 0.1675482307341051,
+      "quarter_ann_median": 0.20886130379143442,
+      "quarter_ann_std": 0.3735431629852937,
+      "quarter_ann_positive_ratio": 0.6666666666666666,
+      "quarter_rankic_min": 0.027841531638167185,
+      "quarter_rankic_mean": 0.0745692260152243,
+      "quarter_rankic_positive_ratio": 1.0,
+      "full_ann": 0.23673196200161,
+      "stress_score": 46.013206250136406,
+      "stress_gate_pass": false
+    }
+  ]
+}

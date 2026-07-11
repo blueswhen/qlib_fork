@@ -1,29 +1,28 @@
 # Current Best Baseline
 
-This file mirrors `current_best_baseline.md` for compatibility with older notes.
+This file mirrors `current_best_baseline.md` for compatibility with older
+notes.
 
 Frozen baseline:
 
-- stage1: `rank_ensemble_3seed_tra72_old6`
-- stage2: `cash_quality_z_tw001`
-- strategy: `prac_m000_hold7_r085`
+- formal run: `strict_zero_runs/strict_zero_h200_20260711_1245`
+- stage1 seeds: `5678,2050,2044`
+- stage2 signal: `cash_quality_z_tw001`
+- strategy: `prac_m000_hold7_r095`
 - account: `150000`
 - topk: `5`
-- final test ann: `0.2643467300531994`
-- final test ir: `1.8243593079319251`
-- final test mdd: `-0.09423283807818256`
+- final test ann: `0.2804402793535583`
+- final test ir: `1.6660541147890104`
+- final test mdd: `-0.10195254346954019`
 
-Reproduce from this directory:
+One-key retrain from `tra_quant`:
 
 ```bash
-cd /home/blueswhen/DL/qlib_fork/tra_quant/stage2
-PYTHONPATH=/home/blueswhen/DL/qlib_fork:$PYTHONPATH python evaluate_stage2_cv_selected_final.py
+./train_strict_fusion_from_zero.sh --run-id strict_zero_repro_YYYYMMDD_1
 ```
 
-Data is expected under:
+Detailed protocol:
 
-- `../../training_data/cn_data_latest`
-- `../../training_data/processed/training`
-
-The detailed reliability review, CV rule, artifacts, and cautions are in
-`current_best_baseline.md`.
+```text
+../STRICT_FROM_ZERO_RETRAIN.md
+```

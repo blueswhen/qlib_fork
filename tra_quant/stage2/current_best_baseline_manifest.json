@@ -1,7 +1,9 @@
 {
-  "baseline_name": "stage2_cash_quality_z_tw001_on_rank_ensemble_3seed_tra72_old6",
-  "updated_at": "2026-06-13",
-  "workspace": "tra_quant/stage2",
+  "baseline_name": "strict_zero_stage1_stage2_cash_quality_z_tw001_3seed_h200",
+  "updated_at": "2026-07-11",
+  "workspace": "tra_quant",
+  "formal_run_id": "strict_zero_h200_20260711_1245",
+  "formal_run_dir": "strict_zero_runs/strict_zero_h200_20260711_1245",
   "data_split": {
     "window_key": "w1",
     "train": ["2012-01-01", "2019-12-31"],
@@ -12,44 +14,64 @@
     "benchmark": "SH000300",
     "instruments": "csi300",
     "account": 150000,
-    "topk": 5
+    "topk": 5,
+    "batch_size": 12000
   },
   "stage1": {
-    "name": "rank_ensemble_3seed_tra72_old6",
-    "strategy_trial": "prac_m000_hold3_r085",
-    "validation_summary": "tmp/rank_ensemble_old6_validation_summary_20260517.txt",
-    "final_test_summary": "tmp/rank_ensemble_old6_final_test_summary_20260517.txt",
-    "repro_json": "tmp/repro_rank_ensemble_single_strategy_v2.json",
-    "test_ann": 0.16268627636270552
+    "name": "rank_ensemble_h200_strict_validation_locked_5678_2050_2044_b12000",
+    "seeds": [5678, 2050, 2044],
+    "validation_summary": "strict_zero_runs/strict_zero_h200_20260711_1245/stage1/tra_global_dual_seed_pattern_summary_strict_zero_h200_20260711_1245_b12000_valid.txt",
+    "test_summary": "strict_zero_runs/strict_zero_h200_20260711_1245/stage1/tra_global_dual_seed_pattern_summary_strict_zero_h200_20260711_1245_b12000_test.txt"
   },
   "stage2": {
-    "selection_scope": "validation_cv_only",
+    "selection_scope": "strict_validation_only_locked_before_test",
+    "test_usage_policy": "single_test_after_locked_manifest",
     "signal": "cash_quality_z_tw001",
-    "signal_kind": "cash_quality_linear",
-    "strategy_trial": "prac_m000_hold7_r085",
+    "signal_kind": "fused_stage2",
+    "signal_profile": "cash-quality-quick",
+    "strategy_profile": "stable-cash-quick",
+    "strategy_trial": "prac_m000_hold7_r095",
     "n_drop": 1,
-    "risk_degree": 0.85,
+    "risk_degree": 0.95,
     "kwargs_extra": {
       "score_margin": 0.0,
       "hold_thresh": 7,
       "slot_budget_ratio": 1.0
     },
-    "fundamental_feature_path": "../../training_data/processed/training/csi300_daily_fundamental_features_rankpct_qlib.parquet",
-    "cv_grid": "tmp/stage2_cv_robust_small_stable_core_20260613_1_cv_grid.csv",
-    "cv_summary": "tmp/stage2_cv_robust_small_stable_core_20260613_1_summary.json",
-    "final_test_summary": "tmp/stage2_cv_cash_quality_z001_hold7r085_final_20260613_1_summary.json",
-    "final_test_txt": "tmp/stage2_cv_cash_quality_z001_hold7r085_final_20260613_1.txt",
-    "final_test_cache": "fusion_cache/cash_quality_z_tw001__prac_m000_hold7_r085_stage2_cv_cash_quality_z001_hold7r085_final_20260613_1_test.pkl",
+    "locked_manifest": "strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/locked_candidate_locked_manifest.json",
+    "immutable_pretest_lock": "strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/locked_candidate_pretest_immutable.json",
+    "immutable_pretest_lock_sha256": "9060ff790b3f63de37539b479a3c3bd5b51404823f62622bc4695911a5a1408c",
+    "final_test_summary": "strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/final_test_once_summary.json",
+    "final_test_summary_sha256": "b5bf219057993ff4847f75ace63705df060e7251cc1d36efb178a598d726621c",
     "final_test": {
-      "test_ann": 0.2643467300531994,
-      "test_ir": 1.8243593079319251,
-      "test_mdd": -0.09423283807818256,
-      "test_IC": 0.04231385517278539,
-      "test_Rank_IC": 0.06442601943935405
+      "test_ann": 0.2804402793535583,
+      "test_ir": 1.6660541147890104,
+      "test_mdd": -0.10195254346954019,
+      "test_IC": 0.038227402896315404,
+      "test_Rank_IC": 0.059762638598347115
+    },
+    "validation": {
+      "valid_ann": 0.25664687372949496,
+      "valid_ir": 1.2771148971848802,
+      "valid_mdd": -0.23370029372504092,
+      "valid_IC": 0.06389892630367724,
+      "valid_Rank_IC": 0.07467096363047035,
+      "year_ann_min": 0.3804493975030897,
+      "half_ann_min": 0.0941108455275603,
+      "quarter_ann_min": -0.1960339739329046,
+      "quarter_positive_ratio": 0.8333333333333334,
+      "quarter_rankic_min": 0.0278415316381671,
+      "stress_score": 317.68064737683267
     }
   },
+  "previous_current_best": {
+    "test_ann": 0.2643467300531994,
+    "test_ir": 1.8243593079319251,
+    "test_mdd": -0.09423283807818256
+  },
   "reproduce": {
-    "final_test_command": "PYTHONPATH=/home/blueswhen/DL/qlib_fork:$PYTHONPATH python evaluate_stage2_cv_selected_final.py",
-    "cv_search_command": "PYTHONPATH=/home/blueswhen/DL/qlib_fork:$PYTHONPATH python run_stage2_signal_cv_search.py --output-prefix tmp/stage2_cv_robust_small_stable_core_20260613_1 --result-suffix stage2_cv_robust_small_stable_core_20260613_1 --signal-profile robust-small --strategy-profile stable-core --num-shards 8 --launch-shards --force-recompute"
+    "one_key_command": "./train_strict_fusion_from_zero.sh --run-id strict_zero_repro_YYYYMMDD_1",
+    "dual_3090_command": "CUDA_VISIBLE_DEVICES=0,1 ./train_strict_fusion_from_zero.sh --run-id strict_zero_3090_YYYYMMDD_1 --gpu-slots 0,1 --jobs-per-gpu 1 --stage2-workers 2",
+    "guide": "STRICT_FROM_ZERO_RETRAIN.md"
   }
 }

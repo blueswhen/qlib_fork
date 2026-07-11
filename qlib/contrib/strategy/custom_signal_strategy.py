@@ -362,6 +362,130 @@ class PracticalTopkDropoutStrategy(TopkDropoutStrategy):
         return TradeDecisionWO(sell_order_list + buy_order_list, self)
 
 
+class RegimeAwarePracticalTopkDropoutStrategy(PracticalTopkDropoutStrategy):
+    """
+    Practical top-k strategy with a benchmark-only risk gate.
+
+    The gate uses lagged benchmark features from the trade calendar signal date.
+    In defensive regimes it can liquidate eligible existing positions instead of
+    merely blocking new buys, which is necessary for small-account risk control.
+    """
+
+    def __init__(
+        self,
+        *,
+        benchmark: str = "SH000300",
+        benchmark_freq: str = "day",
+        trend_short_window: int = 10,
+        trend_long_window: int = 30,
+        vol_window: int = 20,
+        vol_thresh: float = 0.022,
+        caution_risk_degree: float = 0.35,
+        defensive_risk_degree: float = 0.0,
+        defensive_action: str = "liquidate",
+        defensive_min_hold: int | None = None,
+        **kwargs,
+    ):
+        super().__init__(**kwargs)
+        self.benchmark = benchmark
+        self.benchmark_freq = benchmark_freq
+        self.trend_short_window = trend_short_window
+        self.trend_long_window = trend_long_window
+        self.vol_window = vol_window
+        self.vol_thresh = vol_thresh
+        self.caution_risk_degree = caution_risk_degree
+        self.defensive_risk_degree = defensive_risk_degree
+        self.defensive_action = defensive_action
+        self.defensive_min_hold = defensive_min_hold
+        self._regime_signal: Optional[pd.DataFrame] = None
+
+    def reset_level_infra(self, level_infra):
+        super().reset_level_infra(level_infra)
+        trade_len = self.trade_calendar.get_trade_len()
+        signal_start_time, _ = self.trade_calendar.get_step_time(trade_step=0, shift=1)
+        _, signal_end_time = self.trade_calendar.get_step_time(trade_step=trade_len - 1, shift=1)
+        fields = [
+            f"EMA($close, {self.trend_short_window})/EMA($close, {self.trend_long_window})-1",
+            f"Std(Log($close/Ref($close, 1)), {self.vol_window})",
+        ]
+        signal_df = D.features(
+            [self.benchmark],
+            fields=fields,
+            start_time=signal_start_time,
+            end_time=signal_end_time,
+            freq=self.benchmark_freq,
+        )
+        signal_df.columns = ["trend", "vol"]
+        self._regime_signal = signal_df.droplevel(level="instrument")
+
+    def _get_regime(self, trade_step: int) -> str:
+        if self._regime_signal is None or self._regime_signal.empty:
+            return "normal"
+        pred_start_time, pred_end_time = self.trade_calendar.get_step_time(trade_step, shift=1)
+        signal_slice = self._regime_signal.loc[pred_start_time:pred_end_time]
+        if signal_slice.empty:
+            return "normal"
+        latest = signal_slice.iloc[-1]
+        trend = latest["trend"]
+        vol = latest["vol"]
+        if pd.isna(trend) or pd.isna(vol):
+            return "normal"
+        if trend <= 0 and vol >= self.vol_thresh:
+            return "defensive"
+        if trend <= 0 or vol >= self.vol_thresh:
+            return "caution"
+        return "normal"
+
+    def _liquidation_decision(self):
+        trade_step = self.trade_calendar.get_trade_step()
+        trade_start_time, trade_end_time = self.trade_calendar.get_step_time(trade_step)
+        current_temp: Position = copy.deepcopy(self.trade_position)
+        time_per_step = self.trade_calendar.get_freq()
+        min_hold = self.hold_thresh if self.defensive_min_hold is None else int(self.defensive_min_hold)
+        sell_order_list = []
+        for code in current_temp.get_stock_list():
+            if not self.trade_exchange.is_stock_tradable(
+                stock_id=code,
+                start_time=trade_start_time,
+                end_time=trade_end_time,
+                direction=None if self.forbid_all_trade_at_limit else OrderDir.SELL,
+            ):
+                continue
+            if current_temp.get_stock_count(code, bar=time_per_step) < min_hold:
+                continue
+            sell_amount = current_temp.get_stock_amount(code=code)
+            sell_order = Order(
+                stock_id=code,
+                amount=sell_amount,
+                start_time=trade_start_time,
+                end_time=trade_end_time,
+                direction=Order.SELL,
+            )
+            if self.trade_exchange.check_order(sell_order):
+                sell_order_list.append(sell_order)
+        return TradeDecisionWO(sell_order_list, self)
+
+    def generate_trade_decision(self, execute_result=None):
+        regime = self._get_regime(self.trade_calendar.get_trade_step())
+        original_risk = self.risk_degree
+        original_n_drop = self.n_drop
+        try:
+            if regime == "defensive":
+                if self.defensive_action == "liquidate":
+                    return self._liquidation_decision()
+                if self.defensive_action == "hold_only":
+                    self.risk_degree = self.defensive_risk_degree
+                    self.n_drop = 0
+                else:
+                    self.risk_degree = self.defensive_risk_degree
+            elif regime == "caution":
+                self.risk_degree = min(self.risk_degree, self.caution_risk_degree)
+            return super().generate_trade_decision(execute_result=execute_result)
+        finally:
+            self.risk_degree = original_risk
+            self.n_drop = original_n_drop
+
+
 class InverseVolPracticalTopkDropoutStrategy(PracticalTopkDropoutStrategy):
     """
     Size new buys by inverse realized volatility instead of equal slot value.

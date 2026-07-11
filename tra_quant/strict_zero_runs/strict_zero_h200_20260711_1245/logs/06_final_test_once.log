@@ -1,0 +1,40 @@
+[2026-07-11 15:06:41] START 06_final_test_once
+cmd=['/home/niushengxiao/miniconda3/envs/py310/bin/python', 'h200_strict_final_test_once.py', '--locked-manifest', '/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/locked_candidate_locked_manifest.json', '--test-summary-path', '/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage1/tra_global_dual_seed_pattern_summary_strict_zero_h200_20260711_1245_b12000_test.txt', '--output-prefix', '/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/final_test_once', '--result-suffix', 'strict_zero_h200_20260711_1245_final_once']
+cwd=/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2
+
+Gym has been unmaintained since 2022 and does not support NumPy 2.0 amongst other critical functionality.
+Please upgrade to Gymnasium, the maintained drop-in replacement of Gym, or contact the authors of your software and request that they upgrade.
+Users of this version of Gym should be able to simply replace 'import gym' with 'import gymnasium as gym' in the vast majority of cases.
+See the migration guide at https://gymnasium.farama.org/introduction/migration_guide/ for additional information.
+
+backtest loop:   0%|          | 0/784 [00:00<?, ?it/s]
+backtest loop:   4%|▍         | 35/784 [00:00<00:02, 341.33it/s]
+backtest loop:   9%|▉         | 70/784 [00:00<00:02, 333.40it/s]
+backtest loop:  13%|█▎        | 104/784 [00:00<00:02, 328.37it/s]
+backtest loop:  17%|█▋        | 137/784 [00:00<00:01, 326.78it/s]
+backtest loop:  22%|██▏       | 170/784 [00:00<00:01, 326.50it/s]
+backtest loop:  26%|██▌       | 203/784 [00:00<00:01, 324.44it/s]
+backtest loop:  30%|███       | 237/784 [00:00<00:01, 326.61it/s]
+backtest loop:  35%|███▍      | 271/784 [00:00<00:01, 328.28it/s]
+backtest loop:  39%|███▉      | 304/784 [00:00<00:01, 327.15it/s]
+backtest loop:  43%|████▎     | 337/784 [00:01<00:01, 326.13it/s]
+backtest loop:  47%|████▋     | 370/784 [00:01<00:01, 327.05it/s]
+backtest loop:  51%|█████▏    | 403/784 [00:01<00:01, 324.79it/s]
+backtest loop:  56%|█████▌    | 436/784 [00:01<00:01, 274.13it/s]
+backtest loop:  60%|█████▉    | 469/784 [00:01<00:01, 287.74it/s]
+backtest loop:  64%|██████▍   | 502/784 [00:01<00:00, 297.22it/s]
+backtest loop:  68%|██████▊   | 535/784 [00:01<00:00, 305.59it/s]
+backtest loop:  72%|███████▏  | 568/784 [00:01<00:00, 312.44it/s]
+backtest loop:  77%|███████▋  | 601/784 [00:01<00:00, 315.70it/s]
+backtest loop:  81%|████████  | 635/784 [00:02<00:00, 319.87it/s]
+backtest loop:  85%|████████▌ | 668/784 [00:02<00:00, 321.75it/s]
+backtest loop:  89%|████████▉ | 701/784 [00:02<00:00, 324.03it/s]
+backtest loop:  94%|█████████▎| 734/784 [00:02<00:00, 323.79it/s]
+backtest loop:  98%|█████████▊| 768/784 [00:02<00:00, 327.38it/s]
+backtest loop: 100%|██████████| 784/784 [00:02<00:00, 319.97it/s]
+/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/final_test_once_summary.json
+/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/final_test_once.txt
+selected_trial=cash_quality_z_tw001__prac_m000_hold7_r095 test_ann=0.2804402793535583 test_ir=1.6660541147890104 test_mdd=-0.10195254346954019
+/mnt/mtc/niushengxiao/qlib_fork/tra_quant/strict_zero_runs/strict_zero_h200_20260711_1245/stage2/tmp/final_test_once_final_audit.json
+
+[2026-07-11 15:07:20] END 06_final_test_once status=0

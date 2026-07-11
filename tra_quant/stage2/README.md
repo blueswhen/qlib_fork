@@ -1,49 +1,49 @@
 # tra_quant/stage2
 
-This directory archives the current best stage2 baseline on top of the TRA-only
-stage1 rank ensemble.
+This directory contains Stage2 fusion code and the current best baseline
+record. The current best formal artifact is retained outside this source
+directory:
+
+```text
+../strict_zero_runs/strict_zero_h200_20260711_1245
+```
 
 ## Frozen Best
 
-- stage1: `rank_ensemble_3seed_tra72_old6`
+- stage1 seeds: `5678,2050,2044`
 - stage2 signal: `cash_quality_z_tw001`
-- stage2 strategy: `prac_m000_hold7_r085`
+- stage2 strategy: `prac_m000_hold7_r095`
 - account: `150000`
 - topk: `5`
 - benchmark: `SH000300`
 - instruments: `csi300`
-- final test ann: `0.2643467300531994`
-- final test ir: `1.8243593079319251`
-- final test mdd: `-0.09423283807818256`
+- final test ann: `0.2804402793535583`
+- final test ir: `1.6660541147890104`
+- final test mdd: `-0.10195254346954019`
 
-## Reproduce Final Test
+Locked validation:
 
-From this directory:
+- valid ann: `0.25664687372949496`
+- valid IR: `1.2771148971848802`
+- valid MDD: `-0.23370029372504092`
 
-```bash
-cd /home/blueswhen/DL/qlib_fork/tra_quant/stage2
-PYTHONPATH=/home/blueswhen/DL/qlib_fork:$PYTHONPATH python evaluate_stage2_cv_selected_final.py
-```
+## Reproduce From Zero
 
-Expected result:
-
-```text
-selected_trial=cash_quality_z_tw001__prac_m000_hold7_r085
-test_ann=0.2643467300531994
-```
-
-## Reproduce CV Search
+Run the one-key entry from `tra_quant`, not from this subdirectory:
 
 ```bash
-cd /home/blueswhen/DL/qlib_fork/tra_quant/stage2
-PYTHONPATH=/home/blueswhen/DL/qlib_fork:$PYTHONPATH python run_stage2_signal_cv_search.py \
-  --output-prefix tmp/stage2_cv_robust_small_stable_core_20260613_1 \
-  --result-suffix stage2_cv_robust_small_stable_core_20260613_1 \
-  --signal-profile robust-small \
-  --strategy-profile stable-core \
-  --num-shards 8 \
-  --launch-shards \
-  --force-recompute
+cd /path/to/qlib_fork/tra_quant
+./train_strict_fusion_from_zero.sh --run-id strict_zero_repro_YYYYMMDD_1
+```
+
+Dual-3090:
+
+```bash
+CUDA_VISIBLE_DEVICES=0,1 ./train_strict_fusion_from_zero.sh \
+  --run-id strict_zero_3090_YYYYMMDD_1 \
+  --gpu-slots 0,1 \
+  --jobs-per-gpu 1 \
+  --stage2-workers 2
 ```
 
 ## Data Layout
@@ -60,9 +60,5 @@ Fundamental parquet data:
 ../../training_data/processed/training/csi300_daily_fundamental_features_rankpct_qlib.parquet
 ```
 
-The six required TRA stage1 seed caches are also copied into `tra_cache/` so
-stage2 can rebuild the rank-ensemble validation and test signals without using
-the original research workspace.
-
-See `current_best_baseline.md` for the full reliability notes and frozen
-selection rule.
+See `current_best_baseline.md` and `../STRICT_FROM_ZERO_RETRAIN.md` for the
+full protocol, retained artifacts, and validation/test metrics.
