@@ -289,11 +289,15 @@ def ensure_training_data_link(run_root: Path, provider_uri: Path) -> Path:
     run_root.mkdir(parents=True, exist_ok=True)
     source = QLIB_ROOT / "training_data"
     link = run_root / "training_data"
-    if link.exists() or link.is_symlink():
-        if not link.is_symlink() or link.resolve() != source.resolve():
-            raise RuntimeError(f"{link} must be a symlink to {source}")
+    relative_source = Path(os.path.relpath(source, link.parent))
+    if link.is_symlink():
+        if link.resolve() != source.resolve() or Path(os.readlink(link)).is_absolute():
+            link.unlink()
+            link.symlink_to(relative_source, target_is_directory=True)
+    elif link.exists():
+        raise RuntimeError(f"{link} must be a symlink to {source}")
     else:
-        link.symlink_to(source, target_is_directory=True)
+        link.symlink_to(relative_source, target_is_directory=True)
     if not provider_uri.exists():
         raise FileNotFoundError(f"Qlib provider does not exist: {provider_uri}")
     return link

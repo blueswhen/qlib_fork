@@ -72,7 +72,7 @@ Required data:
 The script creates or reuses this symlink:
 
 ```text
-strict_zero_runs/training_data -> ../training_data
+strict_zero_runs/training_data -> ../../training_data
 ```
 
 Use the Python environment that already runs Qlib training. If needed, set it
